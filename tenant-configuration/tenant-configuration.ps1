@@ -3,7 +3,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$TenantId = $env:AZURE_TENANT_ID
+    [string]$TenantId = $env:AZURE_TENANT_ID,
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
@@ -103,6 +103,7 @@ function Add-ResultRecord {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[object]]$List,
 
         [Parameter(Mandatory)]
@@ -140,9 +141,11 @@ function Invoke-CollectorStep {
         [scriptblock]$ScriptBlock,
 
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[object]]$Manifest,
 
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[object]]$Errors
     )
 
@@ -280,6 +283,25 @@ function Export-GraphObjectSet {
 # Module checks
 # ---------------------------------------------------------------------------
 
+function Ensure-ModulesAvailable {
+    [CmdletBinding()]
+    param()
+
+    $requiredModules = @(
+        'Microsoft.Graph.Authentication',
+        'Microsoft.Graph.Identity.DirectoryManagement',
+        'ExchangeOnlineManagement',
+        'MicrosoftTeams',
+        'Microsoft.Online.SharePoint.PowerShell'
+    )
+
+    foreach ($moduleName in $requiredModules) {
+        if (-not (Get-Module -ListAvailable -Name $moduleName)) {
+            throw "Required module '$moduleName' is not installed. Please install it and try again."
+        }
+    }
+}
+
 function Assert-ModuleAvailable {
     [CmdletBinding()]
     param(
@@ -287,8 +309,13 @@ function Assert-ModuleAvailable {
         [string]$Name
     )
 
-    if (-not (Get-Module -ListAvailable -Name $Name)) {
-        throw "Required module '$Name' is not installed."
+    if (-not (Get-Module -Name $Name)) {
+        if (Get-Module -ListAvailable -Name $Name) {
+            Import-Module -Name $Name
+        }
+        else {
+            throw "Required module '$Name' is not installed."
+        }
     }
 }
 
@@ -656,6 +683,8 @@ function Export-SharePointTenant {
 # Main
 # ---------------------------------------------------------------------------
 
+Ensure-ModulesAvailable
+
 $manifest = [System.Collections.Generic.List[object]]::new()
 $errors   = [System.Collections.Generic.List[object]]::new()
 
@@ -669,7 +698,7 @@ if ([string]::IsNullOrWhiteSpace($TenantId)) {
 
 [guid]$parsed = [guid]::Empty
 if (-not [guid]::TryParse($TenantId, [ref]$parsed)) {
-    throw "TenantId is not a valid GUID: $TenantId"
+    throw "TenantId must be invalid as it is not a valid GUID: $TenantId"
 }
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\run.json') -InputObject @{
