@@ -1,2 +1,4 @@
 *.json
 m365-tenant-snapshot
+*.zip
+*.log

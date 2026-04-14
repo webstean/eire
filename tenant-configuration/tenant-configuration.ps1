@@ -283,7 +283,7 @@ function Export-GraphObjectSet {
 # Module checks
 # ---------------------------------------------------------------------------
 
-function Ensure-ModulesAvailable {
+function Confirm-ModulesAvailable {
     [CmdletBinding()]
     param()
 
@@ -679,18 +679,34 @@ function Export-SharePointTenant {
         -InputObject (Get-SPOSite -Limit All | Select-Object Url, Title, Template, Owner, StorageUsageCurrent, LockState, SharingCapability)
 }
 
+function New-ZipFileFromFolder {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FolderPath
+    )
+
+    $parent = Split-Path -Path $FolderPath -Parent
+    $leaf = Split-Path -Path $FolderPath -Leaf
+    $zipPath = Join-Path -Path $parent -ChildPath "$leaf.zip"
+
+    if (Test-Path -LiteralPath $zipPath) {
+        Remove-Item -LiteralPath $zipPath -Force
+    }
+
+    Compress-Archive -Path "$FolderPath\*" -DestinationPath $zipPath -Force
+
+    return $zipPath
+}
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-Ensure-ModulesAvailable
+Confirm-ModulesAvailable
 
 $manifest = [System.Collections.Generic.List[object]]::new()
 $errors   = [System.Collections.Generic.List[object]]::new()
-
-New-OutputFolder -Path $OutputPath
-
-Write-Host ("Output path: {0}" -f $OutputPath)
 
 if ([string]::IsNullOrWhiteSpace($TenantId)) {
     throw "TenantId is not defined or empty - cannot execute"
@@ -698,8 +714,18 @@ if ([string]::IsNullOrWhiteSpace($TenantId)) {
 
 [guid]$parsed = [guid]::Empty
 if (-not [guid]::TryParse($TenantId, [ref]$parsed)) {
-    throw "TenantId must be invalid as it is not a valid GUID: $TenantId"
+    throw "TenantId is not a valid GUID: $TenantId"
 }
+
+# Connect to Graph to get tenant name for output path
+Connect-GraphTenant
+$tenantName = (Get-MgOrganization).DisplayName
+$safeTenantName = $tenantName -replace '[^\w\s-]', '' -replace '\s+', '-'
+$OutputPath = Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}-{1}" -f $safeTenantName, (Get-Date -Format 'yyyyMMdd-HHmmss'))
+
+New-OutputFolder -Path $OutputPath
+
+Write-Host ("Output path: {0}" -f $OutputPath)
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\run.json') -InputObject @{
     StartedAt       = (Get-Date).ToString('o')
@@ -717,10 +743,6 @@ Write-JsonFile -Path (Join-Path $OutputPath 'meta\run.json') -InputObject @{
 
 try {
     if (-not $SkipGraph) {
-        Invoke-CollectorStep -Area 'Graph' -Name 'Connect' -Manifest $manifest -Errors $errors -ScriptBlock {
-            Connect-GraphTenant
-        }
-
         Invoke-CollectorStep -Area 'Graph' -Name 'Core' -Manifest $manifest -Errors $errors -ScriptBlock {
             Export-GraphCore -BasePath $OutputPath
         }
@@ -780,3 +802,11 @@ Write-JsonFile -Path (Join-Path $OutputPath 'meta\errors.json')   -InputObject $
 Write-Host 'Completed.'
 Write-Host ('Manifest : {0}' -f (Join-Path $OutputPath 'meta\manifest.json'))
 Write-Host ('Errors   : {0}' -f (Join-Path $OutputPath 'meta\errors.json'))
+
+try {
+    $zipFile = New-ZipFileFromFolder -FolderPath $OutputPath
+    Write-Host ('Archive  : {0}' -f $zipFile)
+}
+catch {
+    Write-Warning ("Failed to create ZIP archive: {0}" -f $_.Exception.Message)
+}
