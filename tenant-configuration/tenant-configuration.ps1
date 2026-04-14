@@ -4,15 +4,15 @@
 param(
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string]$OutputPath = (Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))),
-
-    [Parameter()]
-    [ValidateNotNullOrEmpty()]
     [string]$TenantId,
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
-    [string]$GraphClientId,
+    [string]$OutputPath = (Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))),
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]$GraphClientId = '1950a258-227b-4e31-a9cf-717495945fc2',  # <-- default for PowerShell CLI tools
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
@@ -663,6 +663,10 @@ $errors   = [System.Collections.Generic.List[object]]::new()
 New-OutputFolder -Path $OutputPath
 
 Write-Host ("Output path: {0}" -f $OutputPath)
+
+if ([string]::IsNullOrWhiteSpace($TenantId)) {
+    throw "TenantId is not defined or empty - cannot execute"
+}
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\run.json') -InputObject @{
     StartedAt       = (Get-Date).ToString('o')
