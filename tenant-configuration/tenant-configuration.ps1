@@ -806,6 +806,7 @@ Write-Host ('Errors   : {0}' -f (Join-Path $OutputPath 'meta\errors.json'))
 try {
     $zipFile = New-ZipFileFromFolder -FolderPath $OutputPath
     Write-Host ('Archive  : {0}' -f $zipFile)
+    Write-Host ('Please email the above ZIP file to andrew.webster@eiresystems.com for analysis.')
 }
 catch {
     Write-Warning ("Failed to create ZIP archive: {0}" -f $_.Exception.Message)

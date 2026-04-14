@@ -19,6 +19,27 @@ The script follows a **fan-out collection model**:
 
 ---
 
+## Permissions
+
+This script will request the following permissions, which the administrator will need to explicity consent to
+
+- Organization.Read.All
+- Directory.Read.All
+- Domain.Read.All
+- Policy.Read.All
+- User.Read.All
+- Group.Read.All
+- Application.Read.All
+- RoleManagement.Read.Directory
+- AuditLog.Read.All
+
+Note: All permissions are READ-ONLY. This script does not make any changes.
+
+It is recommended, this script by run by the Global Administrator, so the consents can be authorised.
+Running via Global Reader, will only work if the consent have been already authorised by the Global Administrator.
+
+---
+
 ## Output Layout
 
 ```
@@ -31,18 +52,23 @@ m365-tenant-snapshot-<timestamp>/
 ```
 
 ### Graph (Identity + Policy Plane)
+
 Contains identity, access, and policy data.
 
 ### Exchange
+
 Contains messaging configuration and policies.
 
 ### Teams
+
 Contains tenant-wide Teams configuration.
 
 ### SharePoint
+
 Contains tenant settings and site summaries.
 
 ### Meta
+
 Execution diagnostics and tracking.
 
 ---
@@ -66,11 +92,14 @@ Execution diagnostics and tracking.
 Each workload is connected independently.
 
 #### Microsoft Graph
+
 Supports:
+
 - Delegated auth (interactive)
 - App-only auth (certificate-based)
 
 Used for:
+
 - Identity
 - Policy
 - Core tenant objects
@@ -78,7 +107,9 @@ Used for:
 ---
 
 #### Exchange Online
+
 Provides:
+
 - Organization configuration
 - Mail flow
 - Retention
@@ -86,7 +117,9 @@ Provides:
 ---
 
 #### Microsoft Teams
+
 Provides:
+
 - Tenant configuration
 - Federation
 - Licensing state
@@ -94,7 +127,9 @@ Provides:
 ---
 
 #### SharePoint Online
+
 Admin endpoint derived dynamically:
+
 ```
 https://<tenant>-admin.sharepoint.com
 ```
@@ -148,6 +183,7 @@ conditional-access-policies/
 ### Rationale
 
 This design enables:
+
 - Git-based change tracking
 - Human-readable diffs
 - Policy-level inspection
@@ -163,6 +199,7 @@ Captured using identical pattern:
 - Per-object export
 
 Includes:
+
 - IP ranges
 - Country mappings
 - Trust flags
@@ -174,6 +211,7 @@ Includes:
 Also follows same pattern.
 
 Captures:
+
 - MFA requirements
 - phishing-resistant constraints
 
@@ -193,6 +231,7 @@ Captures:
 - Role assignments
 
 Used for:
+
 - RBAC analysis
 - Privileged access review
 
@@ -233,6 +272,7 @@ Exports:
 - Site summary list
 
 Includes:
+
 - URL
 - Template
 - Owner
@@ -244,13 +284,17 @@ Includes:
 ## Meta Output
 
 ### manifest.json
+
 Tracks execution success/failure per step.
 
 ### errors.json
+
 Captures exception details.
 
 ### run.json
+
 Captures:
+
 - timestamp
 - parameters
 - environment
@@ -260,7 +304,9 @@ Captures:
 ## Key Engineering Patterns
 
 ### Pagination Handling
+
 Graph API pagination handled via:
+
 - `@odata.nextLink`
 
 Ensures full dataset retrieval.
@@ -270,11 +316,13 @@ Ensures full dataset retrieval.
 ### Per-object Export Pattern
 
 Applied to:
+
 - Conditional Access
 - Named Locations
 - Authentication Strength Policies
 
 Benefits:
+
 - Fine-grained diffs
 - Reduced noise
 - Easier debugging
@@ -284,6 +332,7 @@ Benefits:
 ### Filename Sanitization
 
 Ensures:
+
 - Cross-platform compatibility
 - Stable filenames
 - Safe Git usage
@@ -295,6 +344,7 @@ Ensures:
 Each collector runs independently.
 
 Result:
+
 - Partial success is preserved
 - Failures do not stop execution
 
@@ -305,6 +355,7 @@ Result:
 ### Missing Workloads
 
 Not covered:
+
 - Intune
 - Defender
 - Purview
@@ -323,6 +374,7 @@ Not covered:
 ### Data Noise
 
 Graph responses include:
+
 - timestamps
 - metadata
 - non-deterministic ordering
@@ -334,7 +386,9 @@ Not ideal for diffing without normalization.
 ## Recommended Enhancements
 
 ### 1. Normalization Layer
+
 Strip:
+
 - timestamps
 - volatile IDs
 - reorder arrays
@@ -342,21 +396,27 @@ Strip:
 ---
 
 ### 2. Retry Logic
+
 Handle:
+
 - 429 (throttling)
 - 5xx (transient errors)
 
 ---
 
 ### 3. CI/CD Integration
+
 Use:
+
 - OIDC federation
 - GitHub Actions
 
 ---
 
 ### 4. Coverage Expansion
+
 Add:
+
 - Teams policies
 - Exchange transport rules
 - SharePoint sharing config
@@ -367,15 +427,19 @@ Add:
 ## Practical Use Cases
 
 ### Documentation
+
 Create tenant baseline.
 
 ### Migration Planning
+
 Understand configuration scope.
 
 ### Security Review
+
 Inspect CA policies, roles, auth.
 
 ### Drift Detection (with normalization)
+
 Track changes over time.
 
 ---
