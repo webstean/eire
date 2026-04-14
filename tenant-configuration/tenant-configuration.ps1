@@ -2,9 +2,8 @@
 
 [CmdletBinding()]
 param(
-    [Parameter()]
-    [ValidateNotNullOrEmpty()]
-    [string]$TenantId,
+    [Parameter(Mandatory = $false)]
+    [string]$TenantId = $env:AZURE_TENANT_ID
 
     [Parameter()]
     [ValidateNotNullOrEmpty()]
@@ -666,6 +665,11 @@ Write-Host ("Output path: {0}" -f $OutputPath)
 
 if ([string]::IsNullOrWhiteSpace($TenantId)) {
     throw "TenantId is not defined or empty - cannot execute"
+}
+
+[guid]$parsed = [guid]::Empty
+if (-not [guid]::TryParse($TenantId, [ref]$parsed)) {
+    throw "TenantId is not a valid GUID: $TenantId"
 }
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\run.json') -InputObject @{
