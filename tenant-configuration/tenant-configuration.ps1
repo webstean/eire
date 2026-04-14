@@ -3,15 +3,19 @@
 [CmdletBinding()]
 param(
     [Parameter()]
+    [ValidateNotNullOrEmpty()]
     [string]$OutputPath = (Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))),
 
     [Parameter()]
+    [ValidateNotNullOrEmpty()]
     [string]$TenantId,
 
     [Parameter()]
+    [ValidateNotNullOrEmpty()]
     [string]$GraphClientId,
 
     [Parameter()]
+    [ValidateNotNullOrEmpty()]
     [string]$GraphCertificateThumbprint,
 
     [Parameter()]
@@ -738,4 +742,4 @@ Write-JsonFile -Path (Join-Path $OutputPath 'meta\errors.json')   -InputObject $
 
 Write-Host 'Completed.'
 Write-Host ('Manifest : {0}' -f (Join-Path $OutputPath 'meta\manifest.json'))
-Write-Host ('Errors   : {0}' -f (Join-
+Write-Host ('Errors   : {0}' -f (Join-Path $OutputPath 'meta\errors.json'))
