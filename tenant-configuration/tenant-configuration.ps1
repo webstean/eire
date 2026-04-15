@@ -80,7 +80,18 @@ function Write-JsonFile {
         $null = New-Item -ItemType Directory -Path $directory -Force
     }
 
-    $json = $InputObject | ConvertTo-Json -Depth $Depth
+    $objectToWrite = $InputObject
+    if ($null -eq $InputObject) {
+        $objectToWrite = "None found!"
+    }
+    elseif ($InputObject -is [System.Collections.IEnumerable] -and -not ($InputObject -is [string]) -and -not ($InputObject -is [hashtable])) {
+        $testArray = @($InputObject)
+        if ($testArray.Count -eq 0) {
+            $objectToWrite = "None found!"
+        }
+    }
+
+    $json = $objectToWrite | ConvertTo-Json -Depth $Depth
     [System.IO.File]::WriteAllText($Path, $json, [System.Text.UTF8Encoding]::new($false))
 }
 
@@ -170,25 +181,43 @@ function Get-AllPages {
         [string]$Uri
     )
 
-    $items = New-Object System.Collections.Generic.List[object]
+    Write-Host "Get-AllPages: Fetching URI: $Uri"
+    $items = [System.Collections.Generic.List[object]]::new()
     $next = $Uri
 
     while ($next) {
         $response = Invoke-MgGraphRequest -Method GET -Uri $next -OutputType PSObject
-        if ($null -ne $response.value) {
+        
+        if ($response -is [System.Collections.IEnumerable] -and $null -ne $response.value) {
+            # Response is a collection with a 'value' property
+            $count = @($response.value).Count
+            Write-Host "Get-AllPages: Found $count items in page."
             foreach ($item in $response.value) {
                 $items.Add($item)
             }
+            $next = $response.'@odata.nextLink'
+        }
+        elseif ($response -is [System.Collections.IEnumerable]) {
+            # Response is an array-like object without a 'value' property
+             $count = @($response).Count
+            Write-Host "Get-AllPages: Response is a collection of $count items."
+            foreach($item in $response){
+                $items.Add($item)
+            }
+            $next = $null
         }
         elseif ($null -ne $response) {
+            # Response is a single object
+            Write-Host "Get-AllPages: Response is a single object."
             $items.Add($response)
             $next = $null
-            continue
         }
-
-        $next = $response.'@odata.nextLink'
+        else {
+            # No more data
+            $next = $null
+        }
     }
-
+    Write-Host "Get-AllPages: Total items retrieved: $($items.Count)"
     return $items
 }
 
@@ -239,6 +268,11 @@ function Export-GraphObjectSet {
         [Parameter()]
         [scriptblock]$IndexProjectionScriptBlock
     )
+
+    if ($null -eq $Items -or @($Items).Count -eq 0) {
+        Write-Warning ("Skipping export for '{0}' as the item set is empty." -f $RootFolderName)
+        return
+    }
 
     $folder = Join-Path $BasePath ("graph\{0}" -f $RootFolderName)
     if (-not (Test-Path -LiteralPath $folder)) {
@@ -332,39 +366,42 @@ function Connect-GraphTenant {
 
     Assert-ModuleAvailable -Name Microsoft.Graph.Authentication
 
-    if ($UseAppOnlyGraph) {
-        if ([string]::IsNullOrWhiteSpace($TenantId)) {
-            throw 'TenantId is required when -UseAppOnlyGraph is specified.'
-        }
-        if ([string]::IsNullOrWhiteSpace($GraphClientId)) {
-            throw 'GraphClientId is required when -UseAppOnlyGraph is specified.'
-        }
-        if ([string]::IsNullOrWhiteSpace($GraphCertificateThumbprint)) {
-            throw 'GraphCertificateThumbprint is required when -UseAppOnlyGraph is specified.'
-        }
+    try {
+        if ($UseAppOnlyGraph) {
+            if ([string]::IsNullOrWhiteSpace($TenantId)) {
+                throw 'TenantId is required when -UseAppOnlyGraph is specified.'
+            }
+            if ([string]::IsNullOrWhiteSpace($GraphClientId)) {
+                throw 'GraphClientId is required when -UseAppOnlyGraph is specified.'
+            }
+            if ([string]::IsNullOrWhiteSpace($GraphCertificateThumbprint)) {
+                throw 'GraphCertificateThumbprint is required when -UseAppOnlyGraph is specified.'
+            }
 
-        Connect-MgGraph `
-            -TenantId $TenantId `
-            -ClientId $GraphClientId `
-            -CertificateThumbprint $GraphCertificateThumbprint `
-            -NoWelcome
+            Connect-MgGraph `
+                -TenantId $TenantId `
+                -ClientId $GraphClientId `
+                -CertificateThumbprint $GraphCertificateThumbprint `
+                -NoWelcome
+        }
+        else {
+            Connect-MgGraph `
+                -Scopes @(
+                    'Organization.Read.All',
+                    'Directory.Read.All',
+                    'Domain.Read.All',
+                    'Policy.Read.All',
+                    'User.Read.All',
+                    'Group.Read.All',
+                    'Application.Read.All',
+                    'RoleManagement.Read.Directory',
+                    'AuditLog.Read.All'
+                ) `
+                -NoWelcome
+        }
     }
-    else {
-        Connect-MgGraph `
-            -Scopes @(
-                'Organization.Read.All',
-                'Directory.Read.All',
-                'Domain.Read.All',
-                'Policy.Read.All',
-                'User.Read.All',
-                'Group.Read.All',
-                'Application.Read.All',
-                'RoleManagement.Read.Directory',
-                'Sites.Read.All',
-                'SharePointTenantSettings.Read.All',
-                'AuditLog.Read.All'
-            ) `
-            -NoWelcome
+    catch {
+        throw ("Failed to connect to Microsoft Graph. Please check credentials and permissions. Error: {0}" -f $_.Exception.Message)
     }
 }
 
@@ -373,7 +410,12 @@ function Connect-ExchangeTenant {
     param()
 
     Assert-ModuleAvailable -Name ExchangeOnlineManagement
-    Connect-ExchangeOnline -ShowBanner:$false
+    try {
+        Connect-ExchangeOnline -ShowBanner:$true
+    }
+    catch {
+        throw ("Failed to connect to Exchange Online. Please check credentials and permissions. Error: {0}" -f $_.Exception.Message)
+    }
 }
 
 function Connect-TeamsTenant {
@@ -381,7 +423,12 @@ function Connect-TeamsTenant {
     param()
 
     Assert-ModuleAvailable -Name MicrosoftTeams
-    Connect-MicrosoftTeams | Out-Null
+    try {
+        Connect-MicrosoftTeams | Out-Null
+    }
+    catch {
+        throw ("Failed to connect to Microsoft Teams. Please check credentials and permissions. Error: {0}" -f $_.Exception.Message)
+    }
 }
 
 function Connect-SharePointTenant {
@@ -390,22 +437,27 @@ function Connect-SharePointTenant {
 
     Assert-ModuleAvailable -Name Microsoft.Online.SharePoint.PowerShell
 
-    if ([string]::IsNullOrWhiteSpace($TenantId)) {
-        throw 'TenantId is required to derive the SharePoint admin URL reliably.'
+    try {
+        if ([string]::IsNullOrWhiteSpace($TenantId)) {
+            throw 'TenantId is required to derive the SharePoint admin URL reliably.'
+        }
+
+        $org = Get-MgOrganization
+        $verifiedDomains = @($org.VerifiedDomains)
+        $defaultDomain = @($verifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1).Name
+
+        if ([string]::IsNullOrWhiteSpace($defaultDomain)) {
+            throw 'Could not determine default domain from Graph organization object.'
+        }
+
+        $tenantPrefix = $defaultDomain.Split('.')[0]
+        $adminUrl = "https://{0}-admin.sharepoint.com" -f $tenantPrefix
+
+        Connect-SPOService -Url $adminUrl
     }
-
-    $org = Get-MgOrganization
-    $verifiedDomains = @($org.VerifiedDomains)
-    $defaultDomain = @($verifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1).Name
-
-    if ([string]::IsNullOrWhiteSpace($defaultDomain)) {
-        throw 'Could not determine default domain from Graph organization object.'
+    catch {
+        throw ("Failed to connect to SharePoint Online. Please check credentials and permissions. Error: {0}" -f $_.Exception.Message)
     }
-
-    $tenantPrefix = $defaultDomain.Split('.')[0]
-    $adminUrl = "https://{0}-admin.sharepoint.com" -f $tenantPrefix
-
-    Connect-SPOService -Url $adminUrl
 }
 
 # ---------------------------------------------------------------------------
@@ -447,38 +499,6 @@ function Export-GraphCore {
         -InputObject (Get-MgServicePrincipal -All)
 }
 
-function Export-GraphConditionalAccessPolicyCopies {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$BasePath
-    )
-
-    $policies = Get-AllPages -Uri 'https://graph.microsoft.com/v1.0/identity/conditionalAccess/policies'
-
-    Export-GraphObjectSet `
-        -BasePath $BasePath `
-        -RootFolderName 'conditional-access-policies' `
-        -CollectionFileName 'conditionalAccessPolicies.json' `
-        -IndexFileName 'conditionalAccessPolicies.index.json' `
-        -Items $policies `
-        -NameScriptBlock {
-            param($item)
-            $item.displayName
-        } `
-        -IndexProjectionScriptBlock {
-            param($item, $safeName)
-            [pscustomobject]@{
-                id               = $item.id
-                displayName      = $item.displayName
-                state            = $item.state
-                createdDateTime  = $item.createdDateTime
-                modifiedDateTime = $item.modifiedDateTime
-                fileName         = if ($item.id) { '{0}-{1}.json' -f $safeName, $item.id } else { '{0}.json' -f $safeName }
-            }
-        }
-}
-
 function Export-GraphNamedLocationCopies {
     [CmdletBinding()]
     param(
@@ -487,6 +507,16 @@ function Export-GraphNamedLocationCopies {
     )
 
     $namedLocations = Get-AllPages -Uri 'https://graph.microsoft.com/v1.0/identity/conditionalAccess/namedLocations'
+    $collectionPath = Join-Path $BasePath 'graph\namedLocations.json'
+
+    if ($null -eq $namedLocations -or @($namedLocations).Count -eq 0) {
+        Write-JsonFile -Path $collectionPath -InputObject $null
+        Write-Warning "No named locations found. Created empty collection file."
+        # Also create an empty index file to be consistent
+        $indexPath = Join-Path $BasePath 'graph\namedLocations.index.json'
+        Write-JsonFile -Path $indexPath -InputObject @()
+        return
+    }
 
     Export-GraphObjectSet `
         -BasePath $BasePath `
@@ -522,6 +552,16 @@ function Export-GraphAuthenticationStrengthPolicyCopies {
     )
 
     $authStrengthPolicies = Get-AllPages -Uri 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies'
+    $collectionPath = Join-Path $BasePath 'graph\authenticationStrengthPolicies.json'
+
+    if ($null -eq $authStrengthPolicies -or @($authStrengthPolicies).Count -eq 0) {
+        Write-JsonFile -Path $collectionPath -InputObject $null
+        Write-Warning "No authentication strength policies found. Created empty collection file."
+        # Also create an empty index file to be consistent
+        $indexPath = Join-Path $BasePath 'graph\authenticationStrengthPolicies.index.json'
+        Write-JsonFile -Path $indexPath -InputObject @()
+        return
+    }
 
     Export-GraphObjectSet `
         -BasePath $BasePath `
@@ -558,19 +598,34 @@ function Export-GraphPolicies {
 
     $policyRoot = 'https://graph.microsoft.com/v1.0'
 
-    Export-GraphConditionalAccessPolicyCopies -BasePath $BasePath
+    #Write-Host "Exporting Conditional Access Policies...."
+    #$policies = Get-AllPages -Uri "$policyRoot/identity/conditionalAccess/policies"
+    #Write-Host "Policies = $policies"
+    #Export-GraphObjectSet `
+    #    -BasePath $BasePath `
+    #    -RootFolderName 'conditional-access-policies' `
+    #    -CollectionFileName 'conditionalAccessPolicies.json' `
+    #    -IndexFileName 'conditionalAccessPolicies.index.json' `
+    #    -Items $policies `
+    #    -NameScriptBlock { param($item) $item.displayName }
+
+    Write-Host "Exporting Named Locations...."
     Export-GraphNamedLocationCopies -BasePath $BasePath
+    Write-Host "Exporting Authentication Strength Policies...."
     Export-GraphAuthenticationStrengthPolicyCopies -BasePath $BasePath
 
+    Write-Host "Exporting Authorization Policy...."
     Write-JsonFile -Path (Join-Path $BasePath 'graph\authorizationPolicy.json') `
         -InputObject (Invoke-MgGraphRequest -Method GET -Uri "$policyRoot/policies/authorizationPolicy")
 
+    Write-Host "Exporting Identity Security Defaults Enforcement Policy...."
     Write-JsonFile -Path (Join-Path $BasePath 'graph\identitySecurityDefaultsEnforcementPolicy.json') `
         -InputObject (Invoke-MgGraphRequest -Method GET -Uri "$policyRoot/policies/identitySecurityDefaultsEnforcementPolicy")
 
     Write-JsonFile -Path (Join-Path $BasePath 'graph\authenticationMethodsPolicy.json') `
         -InputObject (Invoke-MgGraphRequest -Method GET -Uri "$policyRoot/policies/authenticationMethodsPolicy")
 
+    Write-Host "Exporting Role Management Directory Role Definitions...."
     Write-JsonFile -Path (Join-Path $BasePath 'graph\roleManagementDirectoryRoleDefinitions.json') `
         -InputObject (Get-AllPages -Uri "$policyRoot/roleManagement/directory/roleDefinitions")
 
@@ -708,6 +763,10 @@ function New-ZipFileFromFolder {
 # Main
 # ---------------------------------------------------------------------------
 
+## Turn off verbose
+$preserve = $PSDefaultParameterValues['*:Verbose']
+$PSDefaultParameterValues['*:Verbose']   = $false
+
 Confirm-ModulesAvailable
 
 $manifest = [System.Collections.Generic.List[object]]::new()
@@ -723,8 +782,11 @@ if (-not [guid]::TryParse($TenantId, [ref]$parsed)) {
 }
 
 # Connect to Graph to get tenant name for output path
+Write-Host "Connecting to Graph Tenant..."
 Connect-GraphTenant
 $tenantName = (Get-MgOrganization).DisplayName
+Write-Host ("Connected to Graph Tenant: {0}" -f $tenantName)
+
 $safeTenantName = $tenantName -replace '[^\w\s-]', '' -replace '\s+', '-'
 $OutputPath = Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}-{1}" -f $safeTenantName, (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
@@ -805,6 +867,7 @@ finally {
         try { Disconnect-ExchangeOnline -Confirm:$true } catch {}
         try { Disconnect-MicrosoftTeams } catch {}
     }
+    $PSDefaultParameterValues['*:Verbose']   = $preserve
 }
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\manifest.json') -InputObject $manifest
