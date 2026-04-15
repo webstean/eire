@@ -30,7 +30,10 @@ param(
     [switch]$SkipTeams,
 
     [Parameter()]
-    [switch]$SkipSharePoint
+    [switch]$SkipSharePoint,
+
+    [Parameter()]
+    [switch]$DisconnectOnExit
 )
 
 Set-StrictMode -Version Latest
@@ -791,9 +794,11 @@ try {
     }
 }
 finally {
-    try { Disconnect-MgGraph | Out-Null } catch {}
-    try { Disconnect-ExchangeOnline -Confirm:$false } catch {}
-    try { Disconnect-MicrosoftTeams } catch {}
+    if ($DisconnectOnExit) {
+        try { Disconnect-MgGraph | Out-Null } catch {}
+        try { Disconnect-ExchangeOnline -Confirm:$false } catch {}
+        try { Disconnect-MicrosoftTeams } catch {}
+    }
 }
 
 Write-JsonFile -Path (Join-Path $OutputPath 'meta\manifest.json') -InputObject $manifest
