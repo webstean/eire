@@ -360,6 +360,8 @@ function Connect-GraphTenant {
                 'Group.Read.All',
                 'Application.Read.All',
                 'RoleManagement.Read.Directory',
+                'Sites.Read.All',
+                'SharePointTenantSettings.Read.All',
                 'AuditLog.Read.All'
             ) `
             -NoWelcome
@@ -726,6 +728,9 @@ $tenantName = (Get-MgOrganization).DisplayName
 $safeTenantName = $tenantName -replace '[^\w\s-]', '' -replace '\s+', '-'
 $OutputPath = Join-Path -Path $PWD -ChildPath ("m365-tenant-snapshot-{0}-{1}" -f $safeTenantName, (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
+$DisconnectOnExit = $DisconnectOnExit.IsPresent
+$DisconnectOnExit = $false
+
 New-OutputFolder -Path $OutputPath
 
 Write-Host ("Output path: {0}" -f $OutputPath)
@@ -795,8 +800,9 @@ try {
 }
 finally {
     if ($DisconnectOnExit) {
+        Write-Host 'Disconnecting from Microsoft API Endpoints...'
         try { Disconnect-MgGraph | Out-Null } catch {}
-        try { Disconnect-ExchangeOnline -Confirm:$false } catch {}
+        try { Disconnect-ExchangeOnline -Confirm:$true } catch {}
         try { Disconnect-MicrosoftTeams } catch {}
     }
 }
