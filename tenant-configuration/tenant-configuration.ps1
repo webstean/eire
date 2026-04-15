@@ -33,7 +33,7 @@ param(
     [switch]$SkipSharePoint,
 
     [Parameter()]
-    [switch]$DisconnectOnExit
+    [switch]$DisconnectOnExit ## By Default, don't disconnect on exit, to allow users to inspect and run additional commands if desired against the connected sessions after the main collection is complete. Use this switch to have the script disconnect from all services on exit, which will also clear any cached credentials in the current session for Graph and Exchange modules.
 )
 
 Set-StrictMode -Version Latest
