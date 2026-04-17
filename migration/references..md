@@ -2,7 +2,10 @@
 
 ## Native Tooling Overviews
 
+### Mailboxes, SharePoint, Files
 - https://learn.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-tenant-to-tenant-migrations?view=o365-worldwide
+### PST Import via Drive Shipping to Microsoft
+- https://learn.microsoft.com/en-us/purview/pst-import-drive-shipping
 
 ## Procedures
 
