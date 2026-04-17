@@ -21,7 +21,7 @@ The script follows a **fan-out collection model**:
 
 ## Permissions
 
-This script will request the following permissions, which the administrator will need to explicity consent to
+This script will request the following Graph permissions, which the administrator will need to explicity consent to
 
 - Organization.Read.All
 - Directory.Read.All
@@ -38,12 +38,16 @@ Note: All permissions are READ-ONLY. This script does not make any changes.
 It is recommended, this script by run by the Global Administrator, so the consents can be authorised.
 Running via Global Reader, will only work if the consent have been already authorised by the Global Administrator.
 
+Other parts of the script leverage the Microsoft Teams and SharePoint PowerShell and these require the Exchange Administrator and Teams Administrator roles.
+
 ---
 
 ## Output Layout
 
-```
+```txt
 m365-tenant-snapshot-<timestamp>/
+├── core/
+├── policies/
 ├── graph/
 ├── exchange/
 ├── teams/
@@ -130,7 +134,7 @@ Provides:
 
 Admin endpoint derived dynamically:
 
-```
+```txt
 https://<tenant>-admin.sharepoint.com
 ```
 
@@ -144,8 +148,6 @@ Collected via Graph SDK:
 
 - Organization
 - Domains
-- Users
-- Groups
 - Applications
 - Service Principals
 - Directory Roles
@@ -159,7 +161,7 @@ These represent the **identity backbone** of the tenant.
 
 ### Files Generated
 
-```
+```txt
 conditionalAccessPolicies.json
 conditionalAccessPolicies.index.json
 conditional-access-policies/
