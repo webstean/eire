@@ -368,7 +368,7 @@ Not covered/Excluded:
 - Entra ID - Group information (list of groups)
 - Source NAS/NFS information
 - Azure network layout
-- Any proxy information
+- Any internal proxy information
 
 ---
 
