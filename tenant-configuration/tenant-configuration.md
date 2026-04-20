@@ -4,7 +4,9 @@
 
 This document provides a **detailed, engineering-grade explanation** of a PowerShell-based Microsoft 365 tenant snapshot script.
 
-The script is designed to extract configuration across multiple Microsoft 365 workloads and persist the results as structured JSON for inspection, auditing, and potential version control.
+The script is designed to extract technical configuration across multiple Microsoft 365 workloads and persist the results as structured JSON for inspection, auditing, and potential version control.
+
+This script DOES NOT extract any business level information, it is just technical configuration information.
 
 ---
 
@@ -354,14 +356,19 @@ Result:
 
 ## Limitations
 
-### Missing Workloads
+### Missing Information
 
-Not covered:
+Not covered/Excluded:
 
 - Intune
 - Defender
 - Purview
 - Power Platform
+- Entra ID - User information (list of users)
+- Entra ID - Group information (list of groups)
+- Source NAS/NFS information
+- Azure network layout
+- Any proxy information
 
 ---
 
