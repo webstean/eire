@@ -51,6 +51,9 @@ New-MigrationBatch `
 > ℹ️ **Note**
 > The AutoComplete is set to false, so the migration continues indefinately (delta), until it is explciily authorised to be completed.
 
+
+At the appointed timem the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
+
 ```powershell
 Complete-MigrationBatch -Identity "Batch1"
 ```
@@ -119,7 +122,7 @@ Get-MigrationUserStatistics -Identity user@contoso.com -IncludeReport | Format-L
 
 Example statistics:
 ```text
-Identity                       : user@contoso.com
+Identity                       : user@source.com
 MigrationType                  : ExchangeRemoteMove
 Status                         : Synced
 BatchId                        : MigrationBatch01
