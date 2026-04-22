@@ -4,17 +4,41 @@
 
 This document describes (in detail) how the mailbox migration will be performed.
 
+## Permissions
 
+The following permission are required in both the source and destination tenants:
+
+* Mailbox.Migration [Application]
+* User.Read.All [Application]
+* Organization.Read.All [Application]
+
+via an Application Registration / Enterprise Application 
 
 ## Overview
 
 The migration will be schedule and cordinated via PowerShell scripts.<br>
-Specifically, the following two cmdlets
+Specifically, the following two cmdlets<br>
 - [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
 - [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
 
+This requires an organisational relationship be setup between the source and desitnation tenants:
 
-## Examples
+Organization relationship (target tenant)
+```powershell
+New-OrganizationRelationship
+```
+
+Migration endpoint (target → source tenant)
+```powershell
+New-MigrationEndpoint -RemoteServer outlook.office365.com -ExchangeRemoteMove
+```
+
+Mailbox mapping (CSV)
+```csv
+SourceMailbox,TargetMailbox
+user1@source.com,user1@target.com
+```
+
 
 ```powershell
 New-MigrationBatch `
