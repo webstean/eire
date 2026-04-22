@@ -29,8 +29,6 @@ This script will request the following Graph permissions, which the administrato
 - Directory.Read.All
 - Domain.Read.All
 - Policy.Read.All
-- User.Read.All
-- Group.Read.All
 - Application.Read.All
 - RoleManagement.Read.Directory
 - AuditLog.Read.All
