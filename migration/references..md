@@ -22,7 +22,7 @@
 - https://learn.microsoft.com/exchange/mailbox-migration/ways-to-migrate-mailboxes-overview
 
 ### Cross-Tenant Mailbox Migration
-- https://learn.microsoft.com/microsoft-365/enterprise/cross-tenant-mailbox-migration
+- https://learn.microsoft.com/en-us/microsoft-365/migration/cross-tenant-mailbox-migration?view=o365-worldwide#prepare-target-user-objects-for-migration
 - https://learn.microsoft.com/exchange/mailbox-migration/perform-cross-tenant-migration
 
 ### Hybrid Migrations
