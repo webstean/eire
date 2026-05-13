@@ -14,9 +14,9 @@ API: Office 365 Exchange Online<br>
 API: Microsoft Graph<br>
 * User.Read.All [Application]
 * Organization.Read.All [Application]
-* Group.Read.All' [Application]
-* GroupMember.Read.All' [Application]
-* Sites.Read.All' [Application]
+* Group.Read.All [Application]
+* GroupMember.Read.All [Application]
+* Sites.Read.All [Application]
 * Policy.Read.All [Application]
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
