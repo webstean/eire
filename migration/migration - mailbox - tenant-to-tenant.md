@@ -21,7 +21,7 @@ API: Microsoft Graph<br>
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
 
-This can be created by the following:
+## SOURCE tenant: Preparation:
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -167,8 +167,52 @@ foreach ($permissionName in $graphPermissionNames) {
         -AppRoleId $role.Id
 }
 ```
-Finally (via the portal) - create either a secret or certificate or a oidc federation (preferred) for the application registration.
-Provide the client_id (application_id), tenantn_id and secret, certificate or oidc federation to EIRE.
+Finally (via the portal) - create a secret AND an oidc federation for the application registration.
+Provide the client_id (application_id), tenant_id and secret and oidc federation to EIRE.
+
+## DESTINATION tenant: Preparation:
+
+Create a migration endpoint in the destination and authorised to talk to the source
+
+```powershell
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
+
+if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
+    Install-PSResource `
+        -Name ExchangeOnlineManagement `
+        -Repository PSGallery `
+        -TrustRepository `
+        -Quiet
+}
+else {
+    Write-Host "Module already installed: ExchangeOnlineManagement" -ForegroundColor DarkGray
+}
+
+Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
+
+Import-Module ExchangeOnlineManagement
+
+Write-Host "Connecting to Exchange Online..." -ForegroundColor Cyan
+
+Connect-ExchangeOnline `
+    -ShowBanner:$false
+
+Write-Host "Connected to Exchange Online." -ForegroundColor Green
+
+$AppId = "[Guid copied from the migrations app -above]"
+$name = "xxx-migration"
+$remote = "<source-tenant>.onmicrosoft.com"
+$secret = "[this variable is your secret password you saved in the previous steps]"
+## Enable customization if tenant is dehydrated
+$dehydrated = Get-OrganizationConfig | select isdehydrated
+if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
+$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
+
+New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
+```
 
 ## Overview
 
