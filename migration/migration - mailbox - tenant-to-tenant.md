@@ -23,6 +23,38 @@ This can be created by the following:
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+Write-Host "Installing Microsoft Graph PowerShell modules..." -ForegroundColor Cyan
+
+$requiredModules = @(
+    'Microsoft.Graph.Authentication',
+    'Microsoft.Graph.Applications'
+)
+
+foreach ($module in $requiredModules) {
+
+    if (-not (Get-Module -ListAvailable -Name $module)) {
+
+        Write-Host "Installing module: $module" -ForegroundColor Yellow
+
+        Install-PSResource `
+            -Name $module `
+            -Repository PSGallery `
+            -TrustRepository `
+            -Quiet
+    }
+    else {
+        Write-Host "Module already installed: $module" -ForegroundColor DarkGray
+    }
+}
+
+Write-Host ""
+Write-Host "Importing Microsoft Graph modules..." -ForegroundColor Cyan
+
+Import-Module Microsoft.Graph.Authentication
+Import-Module Microsoft.Graph.Applications
+
+Write-Host "Connecting to Microsoft Graph..." -ForegroundColor Cyan
+
 Connect-MgGraph -Scopes @(
     'Application.ReadWrite.All',
     'AppRoleAssignment.ReadWrite.All',
@@ -105,6 +137,7 @@ foreach ($permissionName in $permissionNames) {
 }
 ```
 Finally (via the portal) - create either a secret or certificate or a oidc federation (preferred) for the application registration.
+Provide the client_id (application_id), tenantn_id and secret, certificate or oidc federation to EIRE.
 
 ## Overview
 
