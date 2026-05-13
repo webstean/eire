@@ -8,7 +8,10 @@ This document describes (in detail) how the mailbox migration will be performed.
 
 The following permission are required in both the source and destination tenants:
 
+API: Office 365 Exchange Online<br>
 * Mailbox.Migration [Application]
+
+API: Microsoft Graph<br>
 * User.Read.All [Application]
 * Organization.Read.All [Application]
 * Group.Read.All' [Application]
@@ -16,7 +19,7 @@ The following permission are required in both the source and destination tenants
 * Sites.Read.All' [Application]
 * Policy.Read.All [Application]
 
-via an Application Registration / Enterprise Application 
+via a multi-tenant Application Registration / Enterprise Application in each tenant. 
 
 This can be created by the following:
 ```powershell
@@ -62,10 +65,9 @@ Connect-MgGraph -Scopes @(
 )
 
 $displayName = 'xxxx-migration-app' ## customise as required
-$graphAppId = '00000003-0000-0000-c000-000000000000'
 
-$permissionNames = @(
-    'Mailbox.Migration',
+$graphAppId = '00000003-0000-0000-c000-000000000000' ## Microsoft Graph
+$graphPermissionNames = @(
     'User.Read.All',
     'Organization.Read.All',
     'Group.Read.All',
@@ -73,22 +75,40 @@ $permissionNames = @(
     'Sites.Read.All',
     'Policy.Read.All'
 )
-
 $graphSp = Get-MgServicePrincipal `
     -Filter "appId eq '$graphAppId'" `
     -Property Id,AppId,DisplayName,AppRoles
-
-$resourceAccess = foreach ($permissionName in $permissionNames) {
+$graphResourceAccess = foreach ($permissionName in $graphPermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
         $_.AllowedMemberTypes -contains 'Application' -and
         $_.IsEnabled
     }
-
     if (-not $role) {
         throw "Graph application permission not found: $permissionName"
     }
+    @{
+        Id   = $role.Id
+        Type = 'Role'
+    }
+}
 
+$exchangeAppId = '00000003-0000-0000-c000-000000000000'  ## Office 365 Exchange Online
+$exchangeSp = Get-MgServicePrincipal `
+    -Filter "appId eq '$exchangeAppId'" `
+    -Property Id,AppId,DisplayName,AppRoles
+$exchangePermissionNames = @(
+    'Mailbox.Migration',
+)
+$exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
+    $role = $graphSp.AppRoles | Where-Object {
+        $_.Value -eq $permissionName -and
+        $_.AllowedMemberTypes -contains 'Application' -and
+        $_.IsEnabled
+    }
+    if (-not $role) {
+        throw "Graph application permission not found: $permissionName"
+    }
     @{
         Id   = $role.Id
         Type = 'Role'
@@ -97,10 +117,20 @@ $resourceAccess = foreach ($permissionName in $permissionNames) {
 
 $app = New-MgApplication `
     -DisplayName $displayName `
+    -SignInAudience AzureADMultipleOrgs `
+    -Web @{
+        RedirectUris = @(
+            'https://office.com'
+        )
+    } `
     -RequiredResourceAccess @(
         @{
             ResourceAppId  = $graphAppId
-            ResourceAccess = $resourceAccess
+            ResourceAccess = $graphResourceAccess
+        }
+        @{
+            ResourceAppId  = $exchangeAppId
+            ResourceAccess = $graphResourceAccess
         }
     )
 
@@ -122,7 +152,8 @@ Write-Host ""
 Then consent the permissions with the following (or do the consent via the portal):-
 
 ```powershell
-foreach ($permissionName in $permissionNames) {
+## Microsoft Graph
+foreach ($permissionName in $graphPermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
         $_.AllowedMemberTypes -contains 'Application' -and
