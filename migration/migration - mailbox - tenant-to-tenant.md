@@ -13,6 +13,9 @@ API: Office 365 Exchange Online<br>
 |---|---|:---|
 | Mailbox.Migration | Application | Migrate mailboxes
 | Exchange.ManageAsApp | Application | Access Exchange as an application
+| Organization.Read.All | Application | Read (but not change) Exchange settings
+| MailboxSettings.ReadWrite | Application | Create mailboxes 
+
 
 API: Microsoft Graph<br>
 | Permission | Type | Justification
@@ -108,6 +111,8 @@ $exchangeSp = Get-MgServicePrincipal `
     -Property Id,AppId,DisplayName,AppRoles
 $exchangePermissionNames = @(
     'Mailbox.Migration',
+    'Organization.Read.All',
+    'MailboxSettings.ReadWrite',
     'Exchange.ManageAsApp'
 )
 $exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
@@ -202,7 +207,7 @@ Provide the client_id (application_id), tenant_id, secret and confirm the oidc f
 
 ## DESTINATION tenant: Preparation:
 
-Create a migration endpoint (authorised to talk to te source) and establish organisation relationship between destination and the source.
+Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -232,10 +237,10 @@ Connect-ExchangeOnline `
 
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
-$AppId = "[Guid copied from the source migrations app -above]"
+$AppId = "[Guid copied from the source migrations app -created as per above ($app.AppId))]"
 $name = "xxx-migration"
-$remote = "<source-tenant>.onmicrosoft.com"
-$secret = "[secret copies from the source migration app -above]"
+$remote = "<source-tenant>.onmicrosoft.com" ## must be a domain name
+$secret = "[secret from the source migration app -created as per above]"
 ## Enable customization if tenant is dehydrated
 $dehydrated = Get-OrganizationConfig | select isdehydrated
 if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
@@ -264,7 +269,7 @@ Specifically, the following two cmdlets<br>
 - [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
 - [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
 
-This requires an organisational relationship be setup between the source and desitnation tenants (as per above):
+This requires has dependency of an authorised organisational relationship be setup between the two tenants (as per above):
 
 Mailbox mapping (CSV)
 ```csv
