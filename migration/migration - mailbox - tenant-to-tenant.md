@@ -198,7 +198,7 @@ Finally (via the portal) - create a secret AND an oidc federation (Federated Cre
 repo:webstean/eire:ref:refs/heads/main
 ```
 
-Provide the client_id (application_id), tenant_id, secret and oidc federation to EIRE.
+Provide the client_id (application_id), tenant_id, secret and confirm the oidc federation to EIRE.
 
 ## DESTINATION tenant: Preparation:
 
