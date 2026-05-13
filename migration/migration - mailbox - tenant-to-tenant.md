@@ -11,25 +11,35 @@ The following permission are required in both the source and destination tenants
 * Mailbox.Migration [Application]
 * User.Read.All [Application]
 * Organization.Read.All [Application]
+* Group.Read.All' [Application]
+* GroupMember.Read.All' [Application]
+* Sites.Read.All' [Application]
+* Policy.Read.All [Application]
 
 via an Application Registration / Enterprise Application 
 
 This can be created by the following:
 ```powershell
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
 Connect-MgGraph -Scopes @(
     'Application.ReadWrite.All',
     'AppRoleAssignment.ReadWrite.All',
     'Directory.Read.All'
 )
 
-$displayName = 'jefferies migration-app'
+$displayName = 'xxxx-migration-app' ## customise as required
 $graphAppId = '00000003-0000-0000-c000-000000000000'
 
 $permissionNames = @(
+    'Mailbox.Migration',
     'User.Read.All',
+    'Organization.Read.All',
     'Group.Read.All',
     'GroupMember.Read.All',
-    'Sites.Read.All'
+    'Sites.Read.All',
+    'Policy.Read.All'
 )
 
 $graphSp = Get-MgServicePrincipal `
@@ -62,9 +72,23 @@ $app = New-MgApplication `
         }
     )
 
+Write-Host "Application created successfully." -ForegroundColor Green
+Write-Host "  Display Name : $($app.DisplayName)"
+Write-Host "  App ID       : $($app.AppId)"
+Write-Host "  Object ID    : $($app.Id)"
+Write-Host ""
+
 $sp = New-MgServicePrincipal -AppId $app.AppId
+
+Write-Host "Service principal created successfully." -ForegroundColor Green
+Write-Host "  Display Name : $($sp.DisplayName)"
+Write-Host "  Object ID    : $($sp.Id)"
+Write-Host "  App ID       : $($sp.AppId)"
+Write-Host ""
+
 ```
-Then consent to with the following:-
+Then consent the permissions with the following (or do the consent via the portal):-
+
 ```powershell
 foreach ($permissionName in $permissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
@@ -80,7 +104,7 @@ foreach ($permissionName in $permissionNames) {
         -AppRoleId $role.Id
 }
 ```
-Finally (via the portal) - create either a secret or certificate or a oidc federation (preferred)
+Finally (via the portal) - create either a secret or certificate or a oidc federation (preferred) for the application registration.
 
 ## Overview
 
