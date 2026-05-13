@@ -140,7 +140,7 @@ $app = New-MgApplication `
         }
         @{
             ResourceAppId  = $exchangeAppId
-            ResourceAccess = $graphResourceAccess
+            ResourceAccess = $exchangeResourceAccess
         }
     )
 
