@@ -185,7 +185,7 @@ Complete-MigrationBatch -Identity "Batch1"
 
 ## Throughput
 
-Theortical maximum is 10TB per day, but this is not real world.
+Theortical maximum is 10TB per day (as per Microsoft documentation), 2-5TB is typical.
 
 Pilot/POC will determine the exact throughput available between the two tenants.
 
