@@ -95,7 +95,7 @@ $graphResourceAccess = foreach ($permissionName in $graphPermissionNames) {
     }
 }
 
-$exchangeAppId = '00000003-0000-0000-c000-000000000000'  ## Office 365 Exchange Online
+$exchangeAppId = '00000002-0000-0ff1-ce00-000000000000'  ## Office 365 Exchange Online
 $exchangeSp = Get-MgServicePrincipal `
     -Filter "appId eq '$exchangeAppId'" `
     -Property Id,AppId,DisplayName,AppRoles
