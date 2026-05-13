@@ -166,6 +166,22 @@ foreach ($permissionName in $graphPermissionNames) {
         -ResourceId $graphSp.Id `
         -AppRoleId $role.Id
 }
+
+## Exchange Online
+foreach ($permissionName in $exchangePermissionNames) {
+    $role = $exchangeSp.AppRoles | Where-Object {
+        $_.Value -eq $permissionName -and
+        $_.AllowedMemberTypes -contains 'Application' -and
+        $_.IsEnabled
+    }
+
+    New-MgServicePrincipalAppRoleAssignment `
+        -ServicePrincipalId $sp.Id `
+        -PrincipalId $sp.Id `
+        -ResourceId $exchangeSp.Id `
+        -AppRoleId $role.Id
+}
+
 ```
 Finally (via the portal) - create a secret AND an oidc federation for the application registration.
 Provide the client_id (application_id), tenant_id and secret and oidc federation to EIRE.
