@@ -8,7 +8,7 @@ This document describes (in detail) how the mailbox migration will be performed.
 
 The following permission are required in both the source and destination tenants:
 
-API: Office 365 Exchange Online<br>
+**API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
 |---|---|:---|
 | Mailbox.Migration | Application | Migrate mailboxes
@@ -17,7 +17,7 @@ API: Office 365 Exchange Online<br>
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
 
 
-API: Microsoft Graph<br>
+**API: Microsoft Graph**<br>
 | Permission | Type | Justification
 |---|---|:---|
 | User.Read.All | Application | Read (but not change) user information
