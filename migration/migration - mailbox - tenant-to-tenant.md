@@ -33,6 +33,8 @@ via a multi-tenant Application Registration / Enterprise Application in each ten
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$displayName = 'xxxx-migration-app' ## customise as required
+
 Write-Host "Installing Microsoft Graph PowerShell modules..." -ForegroundColor Cyan
 
 $requiredModules = @(
@@ -69,9 +71,7 @@ Connect-MgGraph -Scopes @(
     'Application.ReadWrite.All',
     'AppRoleAssignment.ReadWrite.All',
     'Directory.Read.All'
-)
-
-$displayName = 'xxxx-migration-app' ## customise as required
+) ## You maybe prompted to consent to the scope, depending upon your tenancy configuration. You must consent for everything else to be succesful.
 
 $graphAppId = '00000003-0000-0000-c000-000000000000' ## Microsoft Graph
 $graphPermissionNames = @(
@@ -159,7 +159,7 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-Then consent the permissions with the following (or do the consent via the portal):-
+Then perfom an administrator consent for permissions with the following (or do it interactively via the portal):-
 
 ```powershell
 ## Consent for Microsoft Graph
