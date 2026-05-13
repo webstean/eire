@@ -111,7 +111,7 @@ $exchangePermissionNames = @(
     'Exchange.ManageAsApp'
 )
 $exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
-    $role = $graphSp.AppRoles | Where-Object {
+    $role = $exchangeSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
         $_.AllowedMemberTypes -contains 'Application' -and
         $_.IsEnabled
