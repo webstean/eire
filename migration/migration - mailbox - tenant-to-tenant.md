@@ -273,6 +273,9 @@ user1@source.com,user1@target.com
 ```
 
 Typically a script will be used to create the mailbox from the CSV file.
+> ℹ️ **Information**
+> A mailbox can only be created if the corresponding license user account already exists, as Exchange mailboxes are licensed features.
+
 ```powershell
 ## Assumed, already loggged on with ExchangeOnline cmdlet
 
