@@ -13,6 +13,7 @@ API: Office 365 Exchange Online<br>
 
 API: Microsoft Graph<br>
 * User.Read.All [Application]
+* Application.Read.All [Application]
 * Organization.Read.All [Application]
 * Group.Read.All [Application]
 * GroupMember.Read.All [Application]
@@ -69,6 +70,7 @@ $displayName = 'xxxx-migration-app' ## customise as required
 $graphAppId = '00000003-0000-0000-c000-000000000000' ## Microsoft Graph
 $graphPermissionNames = @(
     'User.Read.All',
+    'Application.Read.All',
     'Organization.Read.All',
     'Group.Read.All',
     'GroupMember.Read.All',
