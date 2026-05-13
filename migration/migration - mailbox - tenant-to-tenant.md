@@ -9,16 +9,21 @@ This document describes (in detail) how the mailbox migration will be performed.
 The following permission are required in both the source and destination tenants:
 
 API: Office 365 Exchange Online<br>
-* Mailbox.Migration [Application]
+| Permission | Type | Justification
+|---|---|:---|
+| Mailbox.Migration | Application | Migrate mailboxes
 
 API: Microsoft Graph<br>
-* User.Read.All [Application]
-* Application.Read.All [Application]
-* Organization.Read.All [Application]
-* Group.Read.All [Application]
-* GroupMember.Read.All [Application]
-* Sites.Read.All [Application]
-* Policy.Read.All [Application]
+| Permission | Type | Justification
+|---|---|:---|
+| User.Read.All | Application | Read (but not change) user information
+| Application.Read.All | Application | Read (but not change) application information
+| Organization.Read.All | Application | Read (but not change) organisation information
+| Group.Read.All | Application | Read (but not change) group information (for permission mapping)
+| GroupMember.Read.All | Application | Read (but not change) group membership (for permission mapping)  
+| Sites.Read.All | Application | Read (but not change) sites
+| Mail.Send | Application | Send email for status tracking throughout migration
+| Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
 
@@ -74,6 +79,7 @@ $graphPermissionNames = @(
     'Organization.Read.All',
     'Group.Read.All',
     'GroupMember.Read.All',
+    'Mail.Send',
     'Sites.Read.All',
     'Policy.Read.All'
 )
@@ -256,17 +262,7 @@ Specifically, the following two cmdlets<br>
 - [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
 - [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
 
-This requires an organisational relationship be setup between the source and desitnation tenants:
-
-Organization relationship (target tenant)
-```powershell
-New-OrganizationRelationship
-```
-
-Migration endpoint (target → source tenant)
-```powershell
-New-MigrationEndpoint -RemoteServer outlook.office365.com -ExchangeRemoteMove
-```
+This requires an organisational relationship be setup between the source and desitnation tenants (as per above):
 
 Mailbox mapping (CSV)
 ```csv
@@ -274,6 +270,43 @@ SourceMailbox,TargetMailbox
 user1@source.com,user1@target.com
 ```
 
+Typically a script will be used to create the mailbox from the CSV file.
+```powershell
+## Assumed, already loggged on with ExchangeOnline cmdlet
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$csvPath = '.\mailboxes.csv'
+
+$mailboxes = Import-Csv -LiteralPath $csvPath
+
+foreach ($row in $mailboxes) {
+
+    $sourceMailbox = $row.SourceMailbox
+    $targetMailbox = $row.TargetMailbox
+
+    Write-Host "Checking target mailbox: $targetMailbox" -ForegroundColor Cyan
+
+    $existingMailbox = Get-EXOMailbox `
+        -Identity $targetMailbox `
+        -ErrorAction SilentlyContinue
+
+    if ($existingMailbox) {
+        Write-Host "Mailbox already exists: $targetMailbox" -ForegroundColor Green
+        continue
+    }
+
+    Write-Host "Mailbox does not exist. Creating: $targetMailbox" -ForegroundColor Yellow
+
+    New-Mailbox `
+        -Name $targetMailbox `
+        -Alias ($targetMailbox.Split('@')[0]) `
+        -PrimarySmtpAddress $targetMailbox
+
+    Write-Host "Created mailbox: $targetMailbox" -ForegroundColor Green
+}
+```
 
 ```powershell
 New-MigrationBatch `
