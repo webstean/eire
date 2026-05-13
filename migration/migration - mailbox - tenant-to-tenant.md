@@ -80,6 +80,7 @@ foreach ($permissionName in $permissionNames) {
         -AppRoleId $role.Id
 }
 ```
+Finally (via the portal) - create either a secret or certificate or a oidc federation (preferred)
 
 ## Overview
 
