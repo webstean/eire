@@ -185,8 +185,12 @@ foreach ($permissionName in $exchangePermissionNames) {
 }
 
 ```
-Finally (via the portal) - create a secret AND an oidc federation for the application registration.
-Provide the client_id (application_id), tenant_id and secret and oidc federation to EIRE.
+Finally (via the portal) - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)
+```text
+repo:webstean/eire:ref:refs/heads/main
+```
+
+Provide the client_id (application_id), tenant_id, secret and oidc federation to EIRE.
 
 ## DESTINATION tenant: Preparation:
 
