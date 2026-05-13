@@ -12,6 +12,7 @@ API: Office 365 Exchange Online<br>
 | Permission | Type | Justification
 |---|---|:---|
 | Mailbox.Migration | Application | Migrate mailboxes
+| Exchange.ManageAsApp | Application | Access Exchange as an application
 
 API: Microsoft Graph<br>
 | Permission | Type | Justification
@@ -107,6 +108,7 @@ $exchangeSp = Get-MgServicePrincipal `
     -Property Id,AppId,DisplayName,AppRoles
 $exchangePermissionNames = @(
     'Mailbox.Migration',
+    'Exchange.ManageAsApp'
 )
 $exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
