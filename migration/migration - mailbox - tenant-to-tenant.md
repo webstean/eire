@@ -14,6 +14,73 @@ The following permission are required in both the source and destination tenants
 
 via an Application Registration / Enterprise Application 
 
+This can be created by the following:
+```powershell
+Connect-MgGraph -Scopes @(
+    'Application.ReadWrite.All',
+    'AppRoleAssignment.ReadWrite.All',
+    'Directory.Read.All'
+)
+
+$displayName = 'jefferies migration-app'
+$graphAppId = '00000003-0000-0000-c000-000000000000'
+
+$permissionNames = @(
+    'User.Read.All',
+    'Group.Read.All',
+    'GroupMember.Read.All',
+    'Sites.Read.All'
+)
+
+$graphSp = Get-MgServicePrincipal `
+    -Filter "appId eq '$graphAppId'" `
+    -Property Id,AppId,DisplayName,AppRoles
+
+$resourceAccess = foreach ($permissionName in $permissionNames) {
+    $role = $graphSp.AppRoles | Where-Object {
+        $_.Value -eq $permissionName -and
+        $_.AllowedMemberTypes -contains 'Application' -and
+        $_.IsEnabled
+    }
+
+    if (-not $role) {
+        throw "Graph application permission not found: $permissionName"
+    }
+
+    @{
+        Id   = $role.Id
+        Type = 'Role'
+    }
+}
+
+$app = New-MgApplication `
+    -DisplayName $displayName `
+    -RequiredResourceAccess @(
+        @{
+            ResourceAppId  = $graphAppId
+            ResourceAccess = $resourceAccess
+        }
+    )
+
+$sp = New-MgServicePrincipal -AppId $app.AppId
+```
+Then consent to with the following:-
+```powershell
+foreach ($permissionName in $permissionNames) {
+    $role = $graphSp.AppRoles | Where-Object {
+        $_.Value -eq $permissionName -and
+        $_.AllowedMemberTypes -contains 'Application' -and
+        $_.IsEnabled
+    }
+
+    New-MgServicePrincipalAppRoleAssignment `
+        -ServicePrincipalId $sp.Id `
+        -PrincipalId $sp.Id `
+        -ResourceId $graphSp.Id `
+        -AppRoleId $role.Id
+}
+```
+
 ## Overview
 
 The migration will be schedule and cordinated via PowerShell scripts.<br>
