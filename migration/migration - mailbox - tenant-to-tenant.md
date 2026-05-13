@@ -152,7 +152,7 @@ Write-Host ""
 Then consent the permissions with the following (or do the consent via the portal):-
 
 ```powershell
-## Microsoft Graph
+## Consent for Microsoft Graph
 foreach ($permissionName in $graphPermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
@@ -167,7 +167,7 @@ foreach ($permissionName in $graphPermissionNames) {
         -AppRoleId $role.Id
 }
 
-## Exchange Online
+## Consent for Exchange Online
 foreach ($permissionName in $exchangePermissionNames) {
     $role = $exchangeSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
@@ -188,7 +188,7 @@ Provide the client_id (application_id), tenant_id and secret and oidc federation
 
 ## DESTINATION tenant: Preparation:
 
-Create a migration endpoint in the destination and authorised to talk to the source
+Create a migration endpoint (authorised to talk to te source) and establish organisation relationship between destination and the source.
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -218,16 +218,29 @@ Connect-ExchangeOnline `
 
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
-$AppId = "[Guid copied from the migrations app -above]"
+$AppId = "[Guid copied from the source migrations app -above]"
 $name = "xxx-migration"
 $remote = "<source-tenant>.onmicrosoft.com"
-$secret = "[this variable is your secret password you saved in the previous steps]"
+$secret = "[secret copies from the source migration app -above]"
 ## Enable customization if tenant is dehydrated
 $dehydrated = Get-OrganizationConfig | select isdehydrated
 if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
 
 New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
+
+$sourceTenantId = "[tenant ID of your trusted partner, where the source mailboxes are]"
+$orgrelname = "[name of your new organization relationship]"
+$orgrels = Get-OrganizationRelationship
+$existingOrgRel = $orgrels | ?{$_.DomainNames -like $sourceTenantId}
+If ($null -ne $existingOrgRel)
+{
+    Set-OrganizationRelationship $existingOrgRel.Name -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound
+}
+If ($null -eq $existingOrgRel)
+{
+    New-OrganizationRelationship $orgrelname -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound -DomainNames $sourceTenantId
+}
 ```
 
 ## Overview
