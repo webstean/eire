@@ -8,9 +8,29 @@ Mailbox via native tooling
 3. Backup Plan
 4. Testing & Verfication
 
-Procedure for enable Microsoft Migration Manager
-1. Prepare Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11. Windows Server 2022 is recommended for best performance.
-2. Install prerequisites
+## Procedure for enabling Microsoft Migration Manager
+
+> ℹ️ **Limitations**
+> Microsoft Migration Manager is intended to SMB/CIFS workflows only (it does not officially support NFS)
+> Windows Server 2022 is recommended for best performance.<br>
+> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, 1TB (SSD) C: Drive<br>
+> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with disk-iops-read-write = 5000 & disk-mbps-read-write = 180
+
+
+
+1. Prepare a single Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11.
+
+> ℹ️ **Information**
+> Windows Server 2022 is recommended for best performance.<br>
+> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, 1TB (SSD) C: Drive<br>
+> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with disk-iops-read-write = 5000 & disk-mbps-read-write = 180
+
+
+> ℹ️ **Recommendation**
+> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration and any transparent proxy (Zscaler, Netskope etc..) software etc...<br>
+> This is recommedended to ensure that those protections (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
+ 
+3. Install prerequisites
 ```powershell
 function Install-MigrationManagerAgentPrereqs {
     [CmdletBinding()]
