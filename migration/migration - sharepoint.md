@@ -12,11 +12,7 @@ Mailbox via native tooling
 
 > ℹ️ **Limitations**
 > Microsoft Migration Manager is intended to SMB/CIFS workflows only (it does not officially support NFS)
-> Windows Server 2022 is recommended for best performance.<br>
-> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, 1TB (SSD) C: Drive<br>
-> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with disk-iops-read-write = 5000 & disk-mbps-read-write = 180
-
-
+> SharePoint destinations paths are limited to 400 characters (including both path and filename/extension) 
 
 1. Prepare a single Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11.
 
