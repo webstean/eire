@@ -205,6 +205,8 @@ Then via the portal - create a secret AND an oidc federation (Federated Credenti
 ```text
 repo:webstean/eire:ref:refs/heads/main
 ```
+<img width="1421" height="610" alt="image" src="https://github.com/user-attachments/assets/43526dfa-11f4-4df1-8489-f68d2e26bb86" />
+
 Provide the client_id (application_id), tenant_id, secret and confirm the oidc federation to EIRE.
 
 On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
