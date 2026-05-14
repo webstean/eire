@@ -158,6 +158,9 @@ Write-Host ""
 Then perfom an administrator consent for permissions with the following script (or do it interactively via the portal):-
 
 ```powershell
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
 ## Administrator consent for Microsoft Graph API calls for migrations
 foreach ($permissionName in $graphPermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
