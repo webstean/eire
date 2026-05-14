@@ -22,6 +22,7 @@ The following are the required permission in both the source and destination ten
 | Mailbox.Migration | Application | Migrate mailboxes
 | Exchange.ManageAsApp | Application | Access Exchange as an application
 | Organization.Read.All | Application | Read (but not change) Exchange settings
+| SMTP.SendAsApp | Application | Send email on behalf of app for reporting
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
 
 
@@ -106,6 +107,7 @@ $exchangePermissionNames = @(
     'Mailbox.Migration',
     'Organization.Read.All',
     'MailboxSettings.ReadWrite',
+    'SMTP.SendAsApp',
     'Exchange.ManageAsApp'
 )
 $exchangeSp = Get-MgServicePrincipal `
