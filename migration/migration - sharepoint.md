@@ -26,13 +26,60 @@ Mailbox via native tooling
 > The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration and any transparent proxy (Zscaler, Netskope etc..) software etc...<br>
 > This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing atypical protections.
  
-3. Install prerequisites
+
+1. Setup certificate-based auth config
+```powershell
+function New-MigrationManagerCertificateAuthConfigFile {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [string]$TenantId = "$env:AZURE_TENANT_ID",
+
+        [Parameter(Mandatory = $false)]
+        [string]$ClientId = "$env:AZURE_CLIENT_ID",
+
+        [Parameter(Mandatory)]
+        [string]$SharePointAdminUrl,
+
+        [Parameter(Mandatory)]
+        [string]$CertificateThumbprint,
+
+        [Parameter()]
+        [string]$OutputPath = '.\migration-manager-cba-config.json'
+    )
+
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = 'Stop'
+
+    $cert = Get-ChildItem -Path Cert:\CurrentUser\My |
+        Where-Object Thumbprint -eq $CertificateThumbprint |
+        Select-Object -First 1
+
+    if (-not $cert) {
+        throw "Certificate not found in CurrentUser\My: $CertificateThumbprint"
+    }
+
+    $config = [ordered]@{
+        Thumbprint = $CertificateThumbprint
+        TenantId   = $TenantId
+        ClientId   = $ClientId
+        AdminUrl   = $SharePointAdminUrl
+    }
+
+    $config |
+        ConvertTo-Json -Depth 5 |
+        Set-Content -LiteralPath $OutputPath -Encoding utf8
+
+    Write-Host "Created config: $((Resolve-Path -LiteralPath $OutputPath).Path)"
+}
+```
+2. Install / Verify agent service/files
 ```powershell
 function Install-MigrationManagerAgentPrereqs {
     [CmdletBinding()]
     param(
         [Parameter()]
-        [int]$MinimumFreeSpaceGB = 150
+        [int]$MinimumFreeSpaceGB = 500
     )
 
     Set-StrictMode -Version Latest
@@ -61,57 +108,7 @@ function Install-MigrationManagerAgentPrereqs {
 
     Write-Host "Prerequisites look OK."
 }
-```
 
-4. Download/run latest agent installer
-5. Setup certificate-based auth config
-```powershell
-function New-MigrationManagerCertificateAuthConfig {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantId,
-
-        [Parameter(Mandatory)]
-        [string]$ClientId,
-
-        [Parameter(Mandatory)]
-        [string]$AdminUrl,
-
-        [Parameter(Mandatory)]
-        [string]$CertificateThumbprint,
-
-        [Parameter()]
-        [string]$OutputPath = '.\migration-manager-cba-config.json'
-    )
-
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = 'Stop'
-
-    $cert = Get-ChildItem -Path Cert:\CurrentUser\My |
-        Where-Object Thumbprint -eq $CertificateThumbprint |
-        Select-Object -First 1
-
-    if (-not $cert) {
-        throw "Certificate not found in CurrentUser\My: $CertificateThumbprint"
-    }
-
-    $config = [ordered]@{
-        Thumbprint = $CertificateThumbprint
-        TenantId   = $TenantId
-        ClientId   = $ClientId
-        AdminUrl   = $AdminUrl
-    }
-
-    $config |
-        ConvertTo-Json -Depth 5 |
-        Set-Content -LiteralPath $OutputPath -Encoding utf8
-
-    Write-Host "Created config: $((Resolve-Path -LiteralPath $OutputPath).Path)"
-}
-```
-7. Install / Verify agent service/files
-```powershell
 function Install-MigrationManagerAgent {
     [CmdletBinding()]
     param(
@@ -156,7 +153,7 @@ function Install-MigrationManagerAgent {
 }
 ```
 
-9. Use Migration Manager PowerShell to create tasks
+3. Use Migration Manager PowerShell to create tasks
 
 ```powershell
 function Invoke-MigrationManagerFileShareMigration {
