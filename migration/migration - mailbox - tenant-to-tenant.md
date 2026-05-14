@@ -210,6 +210,8 @@ repo:webstean/eire:ref:refs/heads/main
 <img width="1340" height="590" alt="image" src="https://github.com/user-attachments/assets/b63e1c64-42ba-4e55-b3c2-df16b9172197" />
 
 **Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
+<img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
+
 
 On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
 
