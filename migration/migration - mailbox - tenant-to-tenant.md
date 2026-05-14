@@ -4,8 +4,8 @@
 
 This document describes (in detail) how the mailbox migration will be setup and performed.<br>
 
-It is expected, the EIRE user principal will have atleast 'Global Reader' in both the source and destination tenants.<br>
-But, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
+It is expected, the EIRE user principals (humans) will have atleast the 'Global Reader' Entra ID roles in both the source and destination tenants.<br>
+Since these account are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
 > ℹ️ **Requirement**
 > All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
@@ -199,8 +199,11 @@ foreach ($permissionName in $exchangePermissionNames) {
         -ResourceId $exchangeSp.Id `
         -AppRoleId $role.Id
 }
-
 ```
+You can inspect the result in the portal:-
+<img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
+
+
 Then via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)
 ```text
 repo:webstean/eire:ref:refs/heads/main
