@@ -2,11 +2,14 @@
 
 ## Introduction
 
-This document describes (in detail) how the mailbox migration will be performed.
+This document describes (in detail) how the mailbox migration will be setup and performed.<br>
+
+It is expected, the EIRE user principal will have atleast 'Global Reader' in both the source and destination tenants.<br>
+But, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
 ## Permissions
 
-The following permission are required in both the source and destination tenants:
+The following are the required permission in both the source and destination tenants:
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -38,43 +41,31 @@ $ErrorActionPreference = 'Stop'
 
 $displayName = 'xxxx-migration-app' ## customise as required
 
-Write-Host "Installing Microsoft Graph PowerShell modules..." -ForegroundColor Cyan
-
 $requiredModules = @(
     'Microsoft.Graph.Authentication',
     'Microsoft.Graph.Applications'
 )
-
 foreach ($module in $requiredModules) {
-
     if (-not (Get-Module -ListAvailable -Name $module)) {
-
         Write-Host "Installing module: $module" -ForegroundColor Yellow
-
         Install-PSResource `
             -Name $module `
             -Repository PSGallery `
             -TrustRepository `
             -Quiet
     }
-    else {
-        Write-Host "Module already installed: $module" -ForegroundColor DarkGray
-    }
 }
-
-Write-Host ""
 Write-Host "Importing Microsoft Graph modules..." -ForegroundColor Cyan
-
 Import-Module Microsoft.Graph.Authentication
 Import-Module Microsoft.Graph.Applications
 
-Write-Host "Connecting to Microsoft Graph..." -ForegroundColor Cyan
-
+Write-Host "Connecting interactively to Microsoft Graph..." -ForegroundColor Cyan
 Connect-MgGraph -Scopes @(
     'Application.ReadWrite.All',
     'AppRoleAssignment.ReadWrite.All',
     'Directory.Read.All'
 ) ## You maybe prompted to consent to the scope, depending upon your tenancy configuration. You must consent for everything else to be succesful.
+## You may have to run this more than once, due to the lag in the consent being recognised.
 
 $graphAppId = '00000003-0000-0000-c000-000000000000' ## Microsoft Graph
 $graphPermissionNames = @(
@@ -164,7 +155,7 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-Then perfom an administrator consent for permissions with the following (or do it interactively via the portal):-
+Then perfom an administrator consent for permissions with the following script (or do it interactively via the portal):-
 
 ```powershell
 ## Administrator consent for Microsoft Graph API calls for migrations
@@ -204,7 +195,7 @@ repo:webstean/eire:ref:refs/heads/main
 ```
 Provide the client_id (application_id), tenant_id, secret and confirm the oidc federation to EIRE.
 
-On the assumption, that Access Permissions have been enabled, the Mail.Send won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
+On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -221,7 +212,7 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
 Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
 Import-Module ExchangeOnlineManagement
 
-Write-Host "Interactively connect to Exchange Online..." -ForegroundColor Cyan
+Write-Host "Interactively connecting to Exchange Online..." -ForegroundColor Cyan
 Connect-ExchangeOnline -ShowBanner:$false
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
@@ -230,7 +221,6 @@ New-ManagementRoleAssignment `
     -Name "App-SMTP-SendAsApp-OrgWide" `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" ## Application ID from above
-
 ```
 
 ## DESTINATION tenant: Preparation:
