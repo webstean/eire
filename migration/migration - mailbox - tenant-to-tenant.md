@@ -10,6 +10,8 @@ But, higher prvileges are required to actually perform the migrations, which is 
 > ℹ️ **Requirement**
 > All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
 
+All scripts are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.
+
 ## Permissions
 
 The following are the required permission in both the source and destination tenants:
