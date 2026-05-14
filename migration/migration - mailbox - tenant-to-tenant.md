@@ -204,9 +204,11 @@ You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
 
-Then via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)
+Then via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
+
 ```text
-repo:webstean/eire:ref:refs/heads/main
+Scenario: GitHub Action
+Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 ```
 <img width="1421" height="610" alt="image" src="https://github.com/user-attachments/assets/43526dfa-11f4-4df1-8489-f68d2e26bb86" />
 <img width="878" height="729" alt="image" src="https://github.com/user-attachments/assets/7c8f673c-44c1-45c8-bcdd-3e164b16fecc" />
