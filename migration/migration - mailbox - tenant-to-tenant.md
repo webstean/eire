@@ -22,6 +22,7 @@ The following are the required permission in both the source and destination ten
 | Mailbox.Migration | Application | Migrate mailboxes
 | Exchange.ManageAsApp | Application | Access Exchange as an application
 | Organization.Read.All | Application | Read (but not change) Exchange settings
+| PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
 | SMTP.SendAsApp | Application | Send email on behalf of app for reporting
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
 
@@ -106,6 +107,7 @@ $exchangeAppId = '00000002-0000-0ff1-ce00-000000000000'  ## Office 365 Exchange 
 $exchangePermissionNames = @(
     'Mailbox.Migration',
     'Organization.Read.All',
+    'PeopleSettings.Read.All',
     'MailboxSettings.ReadWrite',
     'SMTP.SendAsApp',
     'Exchange.ManageAsApp'
