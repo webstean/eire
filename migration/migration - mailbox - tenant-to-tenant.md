@@ -97,15 +97,15 @@ $graphResourceAccess = foreach ($permissionName in $graphPermissionNames) {
 }
 
 $exchangeAppId = '00000002-0000-0ff1-ce00-000000000000'  ## Office 365 Exchange Online
-$exchangeSp = Get-MgServicePrincipal `
-    -Filter "appId eq '$exchangeAppId'" `
-    -Property Id,AppId,DisplayName,AppRoles
 $exchangePermissionNames = @(
     'Mailbox.Migration',
     'Organization.Read.All',
     'MailboxSettings.ReadWrite',
     'Exchange.ManageAsApp'
 )
+$exchangeSp = Get-MgServicePrincipal `
+    -Filter "appId eq '$exchangeAppId'" `
+    -Property Id,AppId,DisplayName,AppRoles
 $exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
     $role = $exchangeSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
