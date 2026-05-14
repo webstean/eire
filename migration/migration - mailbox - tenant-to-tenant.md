@@ -23,7 +23,7 @@ The following are the required permission in both the source and destination ten
 | Exchange.ManageAsApp | Application | Access Exchange as an application
 | Organization.Read.All | Application | Read (but not change) Exchange settings
 | PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
-| SMTP.SendAsApp | Application | Send email on behalf of app for reporting
+| SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
 
 
@@ -36,7 +36,7 @@ The following are the required permission in both the source and destination ten
 | Group.Read.All | Application | Read (but not change) group information (for permission mapping)
 | GroupMember.Read.All | Application | Read (but not change) group membership (for permission mapping)  
 | Sites.Read.All | Application | Read (but not change) sites
-| Mail.Send | Application | Send email for status tracking throughout migration
+| Mail.Send | Application | Send email for status tracking throughout migration (cannot read emails)
 | Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
