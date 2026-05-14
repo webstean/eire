@@ -317,6 +317,7 @@ If the mailbox does not already exist, a script can be used to create the Exchan
 > A mailbox can only be created if the corresponding licensed user account already exists, as Exchange mailboxes are a licensed feature and won't be created unless the user/service principal is attached to an appropriate licese, which will typically create the mailbox in most scenarios.
 
 ```powershell
+## Part of ExchangeOnlineManagement module
 ## Assumed, already loggged on with ExchangeOnline cmdlet
 
 Set-StrictMode -Version Latest
@@ -354,6 +355,8 @@ foreach ($row in $mailboxes) {
 ```
 
 ```powershell
+## Part of ExchangeOnlineManagement module
+## Assumed, already loggged on with ExchangeOnline cmdlet
 New-MigrationBatch `
   -Name "Batch1" `
   -SourceEndpoint "CrossTenantEndpoint" `
@@ -368,6 +371,8 @@ New-MigrationBatch `
 At the appointed timem the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
 
 ```powershell
+## Part of ExchangeOnlineManagement module
+## Assumed, already loggged on with ExchangeOnline cmdlet
 Complete-MigrationBatch -Identity "Batch1"
 ```
 
@@ -383,6 +388,8 @@ Get-MigrationUserStatistics https://learn.microsoft.com/en-us/powershell/module/
 This commandlet can be run during or at the conclusion of the migration.
 
 ```powershell
+## Part of ExchangeOnlineManagement module
+## Assumed, already loggged on with ExchangeOnline cmdlet
 Get-MigrationUser
 Get-MigrationUserStatistics -Identity user@contoso.com -IncludeReport | Format-List Status,Error,Report
 ```
