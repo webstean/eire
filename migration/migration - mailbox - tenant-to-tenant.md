@@ -198,7 +198,7 @@ foreach ($permissionName in $exchangePermissionNames) {
 }
 
 ```
-Finally (via the portal) - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)
+Then via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)
 ```text
 repo:webstean/eire:ref:refs/heads/main
 ```
@@ -210,9 +210,8 @@ On the assumption, that Access Permissions have been enabled, the Mail.Send won'
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
-
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
+    Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
     Install-PSResource `
         -Name ExchangeOnlineManagement `
         -Repository PSGallery `
@@ -242,9 +241,8 @@ Create a migration endpoint (authorised to talk to the source) and then establis
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
-
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
+    Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
     Install-PSResource `
         -Name ExchangeOnlineManagement `
         -Repository PSGallery `
