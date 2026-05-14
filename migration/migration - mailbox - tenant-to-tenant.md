@@ -167,7 +167,7 @@ Write-Host ""
 Then perfom an administrator consent for permissions with the following (or do it interactively via the portal):-
 
 ```powershell
-## Consent for Microsoft Graph
+## Administrator consent for Microsoft Graph API calls for migrations
 foreach ($permissionName in $graphPermissionNames) {
     $role = $graphSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
@@ -182,7 +182,7 @@ foreach ($permissionName in $graphPermissionNames) {
         -AppRoleId $role.Id
 }
 
-## Consent for Exchange Online
+## Administrator consent for Exchange Online API calls for migrations
 foreach ($permissionName in $exchangePermissionNames) {
     $role = $exchangeSp.AppRoles | Where-Object {
         $_.Value -eq $permissionName -and
@@ -202,8 +202,37 @@ Finally (via the portal) - create a secret AND an oidc federation (Federated Cre
 ```text
 repo:webstean/eire:ref:refs/heads/main
 ```
-
 Provide the client_id (application_id), tenant_id, secret and confirm the oidc federation to EIRE.
+
+On the assumption, that Access Permissions have been enabled, the Mail.Send won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
+
+```powershell
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
+
+if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
+    Install-PSResource `
+        -Name ExchangeOnlineManagement `
+        -Repository PSGallery `
+        -TrustRepository `
+        -Quiet
+}
+Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
+Import-Module ExchangeOnlineManagement
+
+Write-Host "Interactively connect to Exchange Online..." -ForegroundColor Cyan
+Connect-ExchangeOnline -ShowBanner:$false
+Write-Host "Connected to Exchange Online." -ForegroundColor Green
+
+## Add role (part of ExchangeOnlineManagement module)
+New-ManagementRoleAssignment `
+    -Name "App-SMTP-SendAsApp-OrgWide" `
+    -Role "Application SMTP.SendAsApp" `
+    -App "$($app.Id)" ## Application ID from above
+
+```
 
 ## DESTINATION tenant: Preparation:
 
@@ -222,19 +251,11 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
         -TrustRepository `
         -Quiet
 }
-else {
-    Write-Host "Module already installed: ExchangeOnlineManagement" -ForegroundColor DarkGray
-}
-
 Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
-
 Import-Module ExchangeOnlineManagement
 
-Write-Host "Connecting to Exchange Online..." -ForegroundColor Cyan
-
-Connect-ExchangeOnline `
-    -ShowBanner:$false
-
+Write-Host "Interactively connect to Exchange Online..." -ForegroundColor Cyan
+Connect-ExchangeOnline -ShowBanner:$false
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
 $AppId = "[Guid copied from the source migrations app -created as per above ($app.AppId))]"
@@ -246,6 +267,7 @@ $dehydrated = Get-OrganizationConfig | select isdehydrated
 if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
 
+## Add migration endpoint (part of ExchangeOnlineManagement module)
 New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
 
 $sourceTenantId = "[tenant ID of your trusted partner, where the source mailboxes are]"
@@ -254,10 +276,12 @@ $orgrels = Get-OrganizationRelationship
 $existingOrgRel = $orgrels | ?{$_.DomainNames -like $sourceTenantId}
 If ($null -ne $existingOrgRel)
 {
+    ## Enusre relationship is enabled (part of ExchangeOnlineManagement module)
     Set-OrganizationRelationship $existingOrgRel.Name -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound
 }
 If ($null -eq $existingOrgRel)
 {
+    ## Add relationship and make it enabled (part of ExchangeOnlineManagement module)
     New-OrganizationRelationship $orgrelname -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound -DomainNames $sourceTenantId
 }
 ```
