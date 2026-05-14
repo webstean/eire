@@ -7,6 +7,9 @@ This document describes (in detail) how the mailbox migration will be setup and 
 It is expected, the EIRE user principal will have atleast 'Global Reader' in both the source and destination tenants.<br>
 But, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
+> ℹ️ **Requirement**
+> All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
+
 ## Permissions
 
 The following are the required permission in both the source and destination tenants:
