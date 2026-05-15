@@ -8,23 +8,39 @@ Mailbox via native tooling
 3. Backup Plan
 4. Testing & Verfication
 
-## Procedure for enabling Microsoft Migration Manager
+## Permissions
+The following permissions are required for creating, supporting and operating the migration for the applicable user principals.
+Entra ID Role: Global Reader<br>
+Entra ID Role: SharePoint Administrator<br>
+Entra ID Role: Teams Administrator<br>
+Entra ID Role: Exchange Administrator<br>
+Entra ID Role: Microsoft 365 Migration Administrator<br>
+
+
+## Procedure for enabling [Microsoft Migration Manager](https://learn.microsoft.com/en-us/sharepointmigration/migrate-to-sharepoint-online)
 
 > ℹ️ **Limitations**<br>
-> Microsoft Migration Manager is intended to SMB/CIFS workflows only (it does not officially support NFS)<br>
-> SharePoint destinations paths are limited to 400 characters (including both path and filename/extension) 
+> Microsoft Migration Manager is intended for SMB/CIFS file share migrations (plus other 3rd part cloud providers) to SharePoint libraries<br>
+> It **does not** officially support NFS - but if the NFS export (dependencies on export options, NFS versions) can be mounted on a Windows then it typically be be migrated.<br>
+> SharePoint destinations paths are limited to 400 characters (including both path and filename/extension) - this include the name of the destination SharePoint library.<br> 
 
 1. Prepare a single Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11.
 
 > ℹ️ **Information**<br>
 > Windows Server 2022 is recommended for best performance.<br>
-> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, 1TB (SSD) C: Drive<br>
-> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with disk-iops-read-write = 5000 & disk-mbps-read-write = 180
+> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, Single 1TB (SSD) C: Drive<br>
+> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with ```disk-iops-read-write = 5000 & disk-mbps-read-write = 180```<br>
+> For optimal performance, one agent should run no more than 30 migration tasks and the service provides no support for assigning a particular tasks to a particular agent.<br>
+> Most migrations, can typically be performed with one agent, supportings tens of Terabytes of data being migrated.<br>
+
+> ℹ️ **Note**<br>
+> By default, Migration Manager uses Microsoft managed Azure Storage Blobs for temporary storage of content and manifest during migration.<br>
+> Customisation of the Azure Storage Blob is possible, but is complex, generally problematic and is not recommended.
 
 
 > ℹ️ **Recommendation**<br>
-> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration and any transparent proxy (Zscaler, Netskope etc..) software etc...<br>
-> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing atypical protections.
+> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
+> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
  
 
 1. Setup certificate-based auth config
