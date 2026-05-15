@@ -9,7 +9,7 @@ Mailbox via native tooling
 4. Testing & Verfication
 
 ## Permissions
-The following permissions are required for creating, supporting and operating the migration for the applicable user principals.
+The following permissions are required for creating, supporting and operating the migration for the applicable user principals.<br>
 Entra ID Role: Global Reader<br>
 Entra ID Role: SharePoint Administrator<br>
 Entra ID Role: Teams Administrator<br>
