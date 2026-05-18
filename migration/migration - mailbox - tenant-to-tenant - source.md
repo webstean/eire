@@ -23,7 +23,7 @@ These setup scripts are intended to be run interactively (by a human) and will r
 
 ## Permissions Overview
 
-The following are the required permission in both the source tenant:
+The following are the required permission in the source tenant:
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -213,7 +213,7 @@ You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
 
-Then via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
+Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
 
 ```text
 Scenario: GitHub Action
