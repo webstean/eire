@@ -305,12 +305,20 @@ Specifically, the following two cmdlets<br>
 - [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
 - [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
 
-This requires has dependency of an authorised organisational relationship be setup between the two tenants (as per above):
+This requires has dependency of an authorised organisational relationship be setup between the two tenants (as per above).
 
-Mailbox mapping (CSV)
+Simple Mailbox mapping (CSV)
 ```csv
 SourceMailbox,TargetMailbox
 user1@source.com,user1@target.com
+```
+
+A migration file can be automated generated via scripting, for example:-
+
+```powershell
+Get-Mailbox -RecipientTypeDetails UserMailbox,SharedMailbox | Select-Object -ExpandProperty Alias | Out-File $migration.UsersTxtFile
+$mailboxes = Get-Content $migration.UsersTxtFile
+$mailboxes | ForEach-Object {Get-Mailbox $_} | Select-Object PrimarySMTPAddress,Alias,SamAccountName,FirstName,LastName,DisplayName,Name,ExchangeGuid,ArchiveGuid,LegacyExchangeDn,EmailAddresses | Export-Clixml $migration.UsersXmlFile
 ```
 
 If the mailbox does not already exist, a script can be used to create the Exchange mailbox from a CSV file.
