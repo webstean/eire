@@ -9,8 +9,9 @@ Since these account are readonly, higher prvileges are required to actually perf
 
 > ℹ️ **Requirement**
 > All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
+>
 
-All scripts are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.
+All scripts are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
 
 ## Permissions
 
@@ -314,7 +315,8 @@ user1@source.com,user1@target.com
 
 If the mailbox does not already exist, a script can be used to create the Exchange mailbox from a CSV file.
 > ℹ️ **Information**
-> A mailbox can only be created if the corresponding licensed user account already exists, as Exchange mailboxes are a licensed feature and won't be created unless the user/service principal is attached to an appropriate licese, which will typically create the mailbox in most scenarios.
+> A mailbox can only be created if the corresponding licensed user account already exists and Exchange mailboxes cannot be created without an appropraite license.
+>
 
 ```powershell
 ## Part of ExchangeOnlineManagement module
