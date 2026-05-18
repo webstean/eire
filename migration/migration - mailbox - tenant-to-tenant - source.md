@@ -261,7 +261,7 @@ New-ManagementRoleAssignment `
 You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
-## **Step 5:** Create Secret and OIDC FEderation
+## **Step 5:** Create Secret and OIDC Federation
 Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
 
 ```text
@@ -276,4 +276,3 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 Provide the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)<br>
 
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
-
