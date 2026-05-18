@@ -4,6 +4,8 @@
 
 ### Mailboxes, SharePoint, Files
 - https://learn.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-tenant-to-tenant-migrations?view=o365-worldwide
+- https://www.codetwo.com/admins-blog/native-cross-tenant-mailbox-migration/
+  
 ### PST Import via Drive Shipping to Microsoft
 - https://learn.microsoft.com/en-us/purview/pst-import-drive-shipping
 
