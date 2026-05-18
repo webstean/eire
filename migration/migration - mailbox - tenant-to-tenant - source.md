@@ -3,7 +3,7 @@
 
 ## Introduction
 
-This document describes (in detail) setting up the M365 source tenant for migration to a M365 destination tenant.
+This document describes (in detail) setting up the M365 source tenant for supporting the migration of mailboxes to another M365 (destination) tenant.
 
 > ℹ️ **Info**<br>
 > EIRE user principals (humans) will need to atleast the 'Global Reader' Entra ID roles in both the source M365 tenant.<br>
@@ -54,7 +54,9 @@ The following are the required permission in the source tenant:
 
 These permission are required to be grant to a multi-tenant Entra ID Application Registration / Enterprise Application in the source tenant.
 
-## **STEP 1:** Create Application Registration / Enterprise Application (PowerShell script)
+## **STEP 1:** Create Application Registration / Enterprise Application
+Execute the following PowerShell script to create a dedicated Application Registration / Enterprise Application with the correct permissions to support the migration.<br>
+
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -177,7 +179,8 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-## **Step 2:** Perfom the consent for the Entra ID permissions within the Application Registration with the following PowerShell script:-
+## **Step 2:** Perfom the consent for Application Registration
+Execute the following PowerShell script to provide consent for the assigned application permissions.
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -243,12 +246,10 @@ New-ManagementRoleAssignment `
 ```
 
 ## **Step 4:** Verification
-
 You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
 ## **Step 5:** Create Secret and OIDC FEderation
-
 Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
 
 ```text
@@ -259,6 +260,8 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 <img width="878" height="729" alt="image" src="https://github.com/user-attachments/assets/7c8f673c-44c1-45c8-bcdd-3e164b16fecc" />
 <img width="1340" height="590" alt="image" src="https://github.com/user-attachments/assets/b63e1c64-42ba-4e55-b3c2-df16b9172197" />
 
-**Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
+## *Step 5:** Provide
+Provide the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)<br>
+
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
 
