@@ -43,7 +43,7 @@ The following are the required permission in both the source and destination ten
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
 
-## SOURCE tenant: Preparation:
+## DESTINATION tenant: Preparation:
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -248,8 +248,7 @@ New-ManagementRoleAssignment `
     -App "$($app.Id)" ## Application ID from above
 ```
 
-## DESTINATION tenant: Preparation:
-
+## DESTINATION tenant: Creation of Migration EndPoint
 Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.
 
 ```powershell
@@ -378,8 +377,7 @@ New-MigrationBatch `
 > ℹ️ **Note**
 > The AutoComplete is set to false, so the migration continues indefinately (delta), until it is explciily authorised to be completed.
 
-
-At the appointed timem the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
+At the appointed time the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
 
 ```powershell
 ## Part of ExchangeOnlineManagement module
