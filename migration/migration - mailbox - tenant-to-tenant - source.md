@@ -215,7 +215,7 @@ foreach ($permissionName in $exchangePermissionNames) {
         -ResourceId $exchangeSp.Id `
         -AppRoleId $role.Id
 }
----
+```
 
 ## **Step 3:** On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following PowerShell script:
 
