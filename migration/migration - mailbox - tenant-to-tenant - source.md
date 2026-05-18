@@ -273,6 +273,10 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 <img width="1340" height="590" alt="image" src="https://github.com/user-attachments/assets/b63e1c64-42ba-4e55-b3c2-df16b9172197" />
 
 ## **Step 5:** Provide Details
-Provide the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)<br>
+Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
+- the client_id (application_id)
+- the tenant_id
+- the secret
+- confirmation that oidc federation has been configured.
 
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
