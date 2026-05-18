@@ -3,20 +3,27 @@
 
 ## Introduction
 
-This document describes (in detail) how the mailbox migration will be setup and performed.<br>
+This document describes (in detail) setting up the M365 source tenant for migration to a M365 destination tenant.
 
-It is expected, the EIRE user principals (humans) will have atleast the 'Global Reader' Entra ID roles in both the source and destination tenants.<br>
-Since these account are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
-
-> ℹ️ **Requirement**
-> All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
+> ℹ️ **Info**
+> EIRE user principals (humans) will have atleast the 'Global Reader' Entra ID roles in both the source and destination tenants.<br>
 >
 
-All scripts are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
+However, since these account are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
-## Permissions
+> ℹ️ **Requirement**
+> This procedure and the migraiton itself is dependent on statisfying the tenant's Conditional Access Policies.
+>
 
-The following are the required permission in both the source and destination tenants:
+These setup scripts are intended to be run interactively (by a human) and will required certain authentication consents to already be enabled or to be enabled during execution.<br>
+
+> ℹ️ **Recommendation**
+> It is recommended that these stesp by performed by the source tenant's 'Global Administrator' <br>
+>
+
+## Permissions Overview
+
+The following are the required permission in both the source tenant:
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -41,9 +48,9 @@ The following are the required permission in both the source and destination ten
 | Mail.Send | Application | Send email for status tracking throughout migration (cannot read emails)
 | Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
-via a multi-tenant Application Registration / Enterprise Application in each tenant. 
+These permission are required to be grant to a multi-tenant Entra ID Application Registration / Enterprise Application in the source tenant.
 
-## SOURCE tenant: Preparation:
+## SOURCE tenant: Create Application Registration / Enterprise Application
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -166,7 +173,7 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-Then perfom an administrator consent for permissions with the following script (or do it interactively via the portal):-
+Then perfom an administrator consent for the Entra ID permissions with the following script (or do it interactively via the portal):-
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -247,245 +254,3 @@ New-ManagementRoleAssignment `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" ## Application ID from above
 ```
-
-## DESTINATION tenant: Preparation:
-
-Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.
-
-```powershell
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
-if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
-    Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
-    Install-PSResource `
-        -Name ExchangeOnlineManagement `
-        -Repository PSGallery `
-        -TrustRepository `
-        -Quiet
-}
-Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
-Import-Module ExchangeOnlineManagement
-
-Write-Host "Interactively connect to Exchange Online..." -ForegroundColor Cyan
-Connect-ExchangeOnline -ShowBanner:$false
-Write-Host "Connected to Exchange Online." -ForegroundColor Green
-
-$AppId = "[Guid copied from the source migrations app -created as per above ($app.AppId))]"
-$name = "xxx-migration"
-$remote = "<source-tenant>.onmicrosoft.com" ## must be a domain name
-$secret = "[secret from the source migration app -created as per above]"
-## Enable customization if tenant is dehydrated
-$dehydrated = Get-OrganizationConfig | select isdehydrated
-if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
-$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
-
-## Add migration endpoint (part of ExchangeOnlineManagement module)
-New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
-
-$sourceTenantId = "[tenant ID of your trusted partner, where the source mailboxes are]"
-$orgrelname = "[name of your new organization relationship]"
-$orgrels = Get-OrganizationRelationship
-$existingOrgRel = $orgrels | ?{$_.DomainNames -like $sourceTenantId}
-If ($null -ne $existingOrgRel)
-{
-    ## Enusre relationship is enabled (part of ExchangeOnlineManagement module)
-    Set-OrganizationRelationship $existingOrgRel.Name -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound
-}
-If ($null -eq $existingOrgRel)
-{
-    ## Add relationship and make it enabled (part of ExchangeOnlineManagement module)
-    New-OrganizationRelationship $orgrelname -Enabled:$true -MailboxMoveEnabled:$true -MailboxMoveCapability Inbound -DomainNames $sourceTenantId
-}
-```
-
-## Overview
-
-The migration will be schedule and cordinated via PowerShell scripts.<br>
-Specifically, the following two cmdlets<br>
-- [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
-- [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
-
-This requires has dependency of an authorised organisational relationship be setup between the two tenants (as per above).
-
-Simple Mailbox mapping (CSV)
-```csv
-SourceMailbox,TargetMailbox
-user1@source.com,user1@target.com
-```
-
-A migration file can be automated generated via scripting, for example:-
-
-```powershell
-Get-Mailbox -RecipientTypeDetails UserMailbox,SharedMailbox | Select-Object -ExpandProperty Alias | Out-File $migration.UsersTxtFile
-$mailboxes = Get-Content $migration.UsersTxtFile
-$mailboxes | ForEach-Object {Get-Mailbox $_} | Select-Object PrimarySMTPAddress,Alias,SamAccountName,FirstName,LastName,DisplayName,Name,ExchangeGuid,ArchiveGuid,LegacyExchangeDn,EmailAddresses | Export-Clixml $migration.UsersXmlFile
-```
-
-If the mailbox does not already exist, a script can be used to create the Exchange mailbox from a CSV file.
-> ℹ️ **Information**
-> A mailbox can only be created if the corresponding licensed user account already exists and Exchange mailboxes cannot be created without an appropraite license.
->
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
-
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
-$csvPath = '.\mailboxes.csv'
-
-$mailboxes = Import-Csv -LiteralPath $csvPath
-
-foreach ($row in $mailboxes) {
-
-    $sourceMailbox = $row.SourceMailbox
-    $targetMailbox = $row.TargetMailbox
-
-    Write-Host "Checking target mailbox: $targetMailbox" -ForegroundColor Cyan
-
-    $existingMailbox = Get-EXOMailbox `
-        -Identity $targetMailbox `
-        -ErrorAction SilentlyContinue
-
-    if ($existingMailbox) {
-        Write-Host "Mailbox already exists: $targetMailbox" -ForegroundColor Green
-        continue
-    }
-
-    Write-Host "Mailbox does not exist. Creating: $targetMailbox" -ForegroundColor Yellow
-
-    New-Mailbox `
-        -Name $targetMailbox `
-        -Alias ($targetMailbox.Split('@')[0]) `
-        -PrimarySmtpAddress $targetMailbox
-
-    Write-Host "Created mailbox: $targetMailbox" -ForegroundColor Green
-}
-```
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
-New-MigrationBatch `
-  -Name "Batch1" `
-  -SourceEndpoint "CrossTenantEndpoint" `
-  -CSVData ([System.IO.File]::ReadAllBytes("users.csv")) `
-  -AutoStart $true `
-  -AutoComplete $false
-```
-> ℹ️ **Note**
-> The AutoComplete is set to false, so the migration continues indefinately (delta), until it is explciily authorised to be completed.
-
-
-At the appointed timem the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
-Complete-MigrationBatch -Identity "Batch1"
-```
-
-## Throughput
-
-Theortical maximum is 10TB per day (as per Microsoft documentation), 2-5TB is typical.
-
-Pilot/POC will determine the exact throughput available between the two tenants.
-
-# Monitoring
-
-Get-MigrationUserStatistics https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/get-migrationuserstatistics?view=exchange-ps<br>
-This commandlet can be run during or at the conclusion of the migration.
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
-Get-MigrationUser
-Get-MigrationUserStatistics -Identity user@contoso.com -IncludeReport | Format-List Status,Error,Report
-```
-
-## Available Statistics
-
-### Identity / status
-- Identity<br>
-- Status<br>
-- StatusDetail<br>
-- MigrationState<br>
-- MigrationType<br>
-- BatchId<br>
-
-### Mailbox identity
-- EmailAddress<br>
-- MailboxGuid<br>
-- ExchangeGuid<br>
-- TargetMailboxGuid<br>
-
-### Timing
-- QueuedTime<br>
-- StartTime<br>
-- InitialSeedingCompletedTime<br>
-- FinalSyncTime<br>
-- CompletionTime<br>
-
-### Progress
-- PercentComplete<br>
-- BytesTransferred<br>
-- BytesTransferredPerMinute<br>
-- ItemsTransferred<br>
-- ItemsSkipped<br>
-
-### Duration metrics
-- TotalInProgressDuration<br>
-- TotalQueuedDuration<br>
-- TotalFailedDuration<br>
-- TotalSuspendedDuration<br>
-
-### Error / diagnostics
-- FailureType<br>
-- ErrorSummary<br>
-- ErrorDetails<br>
-- LastFailureTime<br>
-
-### Misc
-- SyncedItemCount<br>
-- SkippedItemCount<br>
-
-Example statistics:
-```text
-Identity                       : user@source.com
-MigrationType                  : ExchangeRemoteMove
-Status                         : Synced
-BatchId                        : MigrationBatch01
-MailboxGuid                    : 3f2c1c0a-6bfa-4a4a-9c5d-8a6c9c1e1234
-MailboxSize                    : 3.45 GB (3,701,234,567 bytes)
-ItemsSynced                    : 24873
-ItemsSkipped                   : 0
-EstimatedTransferSize          : 3.45 GB (3,701,234,567 bytes)
-EstimatedTransferItemCount     : 24873
-SyncedItemCount                : 24873
-SyncedItemsSize                : 3.45 GB (3,701,234,567 bytes)
-PercentComplete                : 100
-
-LastSyncedTime                 : 22/04/2026 10:12:45 AM
-QueuedTime                     : 22/04/2026 08:55:00 AM
-StartTime                      : 22/04/2026 09:00:12 AM
-EndTime                        : 22/04/2026 10:12:45 AM
-
-TotalQueuedDuration            : 00:05:12
-TotalInProgressDuration        : 01:12:33
-TotalTransientFailureDuration  : 00:00:00
-TotalIdleDuration              : 00:02:10
-
-Error                          :
-FailureCode                    :
-FailureType                    :
-
-StatusDetail                   : Completed
-Direction                      : Onboarding
-Flags                          : None
-
-Report                         : {MailboxMigration, InitialSeedingCompleted, IncrementalSyncCompleted, CompletionFinalized}
-```
-
-
