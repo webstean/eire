@@ -39,7 +39,6 @@ The following are the required permission in the source tenant:
 | SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
 
-
 **API: Microsoft Graph**<br>
 | Permission | Type | Justification
 |---|---|:---|
@@ -131,11 +130,11 @@ $exchangePermissionNames = @(
 $exchangeSp = Get-MgServicePrincipal `
     -Filter "appId eq '$exchangeAppId'" `
     -Property Id,AppId,DisplayName,AppRoles
-$exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
-    $role = $exchangeSp.AppRoles | Where-Object {
-        $_.Value -eq $permissionName -and
-        $_.AllowedMemberTypes -contains 'Application' -and
-        $_.IsEnabled
+    $exchangeResourceAccess = foreach ($permissionName in $exchangePermissionNames) {
+        $role = $exchangeSp.AppRoles | Where-Object {
+            $_.Value -eq $permissionName -and
+            $_.AllowedMemberTypes -contains 'Application' -and
+            $_.IsEnabled
     }
     if (-not $role) {
         throw "Graph application permission not found: $permissionName"
@@ -277,6 +276,6 @@ Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
 - the client_id (application_id)
 - the tenant_id
 - the secret
-- confirmation that oidc federation has been configured.
+- confirmation that oidc federation has been configured as per above.
 
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
