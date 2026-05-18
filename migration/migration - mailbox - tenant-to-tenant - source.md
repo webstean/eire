@@ -6,10 +6,10 @@
 This document describes (in detail) setting up the M365 source tenant for migration to a M365 destination tenant.
 
 > ℹ️ **Info**
-> EIRE user principals (humans) will have atleast the 'Global Reader' Entra ID roles in both the source and destination tenants.<br>
+> EIRE user principals (humans) will need to atleast the 'Global Reader' Entra ID roles in both the source M365 tenant.<br>
 >
 
-However, since these account are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
+However, since these accounts are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
 > ℹ️ **Requirement**
 > This procedure and the migraiton itself is dependent on statisfying the tenant's Conditional Access Policies.
