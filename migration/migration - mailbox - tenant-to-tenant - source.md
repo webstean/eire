@@ -5,25 +5,29 @@
 
 This document describes (in detail) setting up the M365 source tenant for migration to a M365 destination tenant.
 
-> ℹ️ **Info**
+> ℹ️ **Info**<br>
 > EIRE user principals (humans) will need to atleast the 'Global Reader' Entra ID roles in both the source M365 tenant.<br>
 >
 
 However, since these accounts are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
 
-> ℹ️ **Requirement**
+> ℹ️ **Requirement**<br>
 > This procedure and the migraiton itself is dependent on statisfying the tenant's Conditional Access Policies.
 >
 
 These setup scripts are intended to be run interactively (by a human) and will required certain authentication consents to already be enabled or to be enabled during execution.<br>
 
-> ℹ️ **Recommendation**
+> ℹ️ **Recommendation**<br>
 > It is recommended that these stesp by performed by the source tenant's 'Global Administrator' <br>
 >
 
 ## Permissions Overview
 
 The following are the required permission in the source tenant:
+
+> ℹ️ **Note**<br>
+> The mailbox migration is utlimately controlled from the destination tenant.<br>
+>
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -50,7 +54,7 @@ The following are the required permission in the source tenant:
 
 These permission are required to be grant to a multi-tenant Entra ID Application Registration / Enterprise Application in the source tenant.
 
-## SOURCE tenant: Create Application Registration / Enterprise Application
+## **STEP 1:** Create Application Registration / Enterprise Application (PowerShell script)
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -173,7 +177,7 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-Then perfom an administrator consent for the Entra ID permissions with the following script (or do it interactively via the portal):-
+## **Step 2:** Perfom the consent for the Entra ID permissions within the Application Registration with the following PowerShell script:-
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -208,26 +212,9 @@ foreach ($permissionName in $exchangePermissionNames) {
         -ResourceId $exchangeSp.Id `
         -AppRoleId $role.Id
 }
-```
-You can inspect the result in the portal:-
-<img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
+---
 
-
-Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
-
-```text
-Scenario: GitHub Action
-Subject Identifier: repo:webstean/eire:ref:refs/heads/main
-```
-<img width="1421" height="610" alt="image" src="https://github.com/user-attachments/assets/43526dfa-11f4-4df1-8489-f68d2e26bb86" />
-<img width="878" height="729" alt="image" src="https://github.com/user-attachments/assets/7c8f673c-44c1-45c8-bcdd-3e164b16fecc" />
-<img width="1340" height="590" alt="image" src="https://github.com/user-attachments/assets/b63e1c64-42ba-4e55-b3c2-df16b9172197" />
-
-**Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
-<img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
-
-
-On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
+## **Step 3:** On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following PowerShell script:
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -254,3 +241,24 @@ New-ManagementRoleAssignment `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" ## Application ID from above
 ```
+
+## **Step 4:** Verification
+
+You can inspect the result in the portal:-
+<img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
+
+## **Step 5:** Create Secret and OIDC FEderation
+
+Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
+
+```text
+Scenario: GitHub Action
+Subject Identifier: repo:webstean/eire:ref:refs/heads/main
+```
+<img width="1421" height="610" alt="image" src="https://github.com/user-attachments/assets/43526dfa-11f4-4df1-8489-f68d2e26bb86" />
+<img width="878" height="729" alt="image" src="https://github.com/user-attachments/assets/7c8f673c-44c1-45c8-bcdd-3e164b16fecc" />
+<img width="1340" height="590" alt="image" src="https://github.com/user-attachments/assets/b63e1c64-42ba-4e55-b3c2-df16b9172197" />
+
+**Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
+<img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
+
