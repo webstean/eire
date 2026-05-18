@@ -6,7 +6,7 @@
 This document describes (in detail) setting up the M365 source tenant for supporting the migration of mailboxes to another M365 (destination) tenant.
 
 > ℹ️ **Info**<br>
-> EIRE user principals (humans) will need to atleast the 'Global Reader' Entra ID roles in both the source M365 tenant.<br>
+> EIRE user principals (humans) will need to atleast the 'Global Reader' Entra ID roles in the source M365 tenant.<br>
 >
 
 However, since these accounts are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
