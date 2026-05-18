@@ -60,6 +60,7 @@ Execute the following PowerShell script to create a dedicated Application Regist
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 $displayName = 'xxxx-migration-app' ## customise as required
 
@@ -185,6 +186,7 @@ Execute the following PowerShell script to provide consent for the assigned appl
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 ## Administrator consent for Microsoft Graph API calls for migrations
 foreach ($permissionName in $graphPermissionNames) {
@@ -223,6 +225,7 @@ On the assumption, that Access Permissions have been enabled, the Mail.Send perm
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
