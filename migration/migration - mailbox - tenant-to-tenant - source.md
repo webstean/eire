@@ -189,7 +189,7 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 if ( ($null -eq $app) -or ($null -eq $sp) ) {
-    throw 'Critical variables (app and sp) has been not defined - see previous step'
+    throw 'Critical variables (app and sp) have not been defined - see previous step'
 }
 
 ## Administrator consent for Microsoft Graph API calls for migrations
@@ -232,7 +232,7 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
 if ( ($null -eq $app) -or ($null -eq $sp) ) {
-    throw 'Critical variables (app and sp) has been not defined - see previous step'
+    throw 'Critical variables (app and sp) have not been defined - see previous step'
 }
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
