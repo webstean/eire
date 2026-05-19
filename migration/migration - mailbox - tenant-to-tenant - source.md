@@ -59,6 +59,7 @@ Execute the following PowerShell script to create a dedicated Application Regist
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
+$PSDefaultParameterValues['*:Verbose'] = $false
 
 $displayName = 'xxxx-migration-app' ## customise as required
 
@@ -184,6 +185,7 @@ Execute the following PowerShell script to provide consent for the assigned appl
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
+$PSDefaultParameterValues['*:Verbose'] = $false
 
 if ( ($null -eq $app) -or ($null -eq $sp) ) {
     throw 'Critical variables (app and sp) have not been defined - see previous step'
