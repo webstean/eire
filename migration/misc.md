@@ -8,10 +8,6 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
-if ( ($null -eq $app) -or ($null -eq $sp) ) {
-    throw 'Critical variables (app and sp) have not been defined - see previous step'
-}
-
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
     Install-PSResource `
@@ -27,10 +23,36 @@ Write-Host "Interactively connecting to Exchange Online..." -ForegroundColor Cya
 Connect-ExchangeOnline -ShowBanner:$false
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
-## Create a management scope
-$scope = New-ManagementScope `
-    -Name "Hub-M365-Mailboxes" `
-    -RecipientRestrictionFilter "Alias -like 'HUB_*'"
+$scopeName = 'Hub-M365-Mailboxes'
+$filter = "Alias -like 'HUB_*'"
+
+$scope = Get-ManagementScope `
+    -Identity $scopeName `
+    -ErrorAction SilentlyContinue
+
+if ($null -eq $scope) {
+    Write-Host "Creating management scope: $scopeName"
+    $scope = New-ManagementScope `
+        -Name $scopeName `
+        -RecipientRestrictionFilter $filter `
+        -ErrorAction Stop
+}
+else {
+    Write-Host "Updating management scope: $scopeName"
+    $scope = Set-ManagementScope `
+        -Identity $scopeName `
+        -RecipientRestrictionFilter $filter `
+        -Confirm:$false `
+        -ErrorAction Stop
+
+    $scope = Get-ManagementScope `
+        -Identity $scopeName `
+        -ErrorAction Stop
+}
+
+if ( ($null -eq $app) -or ($null -eq $sp) ) {
+    throw 'Critical variables (app and sp) have not been defined - see previous step'
+}
 
 ## Add role (part of ExchangeOnlineManagement module)
 New-ManagementRoleAssignment `
