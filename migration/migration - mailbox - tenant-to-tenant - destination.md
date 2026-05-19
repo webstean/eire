@@ -43,7 +43,8 @@ The following are the required permission in both the source and destination ten
 
 via a multi-tenant Application Registration / Enterprise Application in each tenant. 
 
-## DESTINATION tenant: Preparation:
+## **Step 1:** Create App Registration / Enterprise Application
+Create the migration application registration and enterprise application with the following PowerShell:
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -167,8 +168,8 @@ Write-Host "  App ID       : $($sp.AppId)"
 Write-Host ""
 
 ```
-Then perfom an administrator consent for permissions with the following script (or do it interactively via the portal):-
-
+## Step 2: **Perform Administrator Consent**
+Now the correct permissions are assigned, perform an administrator consense for those permissions with the following PowwerShell script.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
