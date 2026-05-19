@@ -7,6 +7,7 @@ On the assumption, that Access Permissions have been enabled, the Mail.Send perm
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
+$PSDefaultParameterValues['*:Verbose'] = $false
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
