@@ -37,7 +37,6 @@ The following are the required permission in the source tenant:
 | Organization.Read.All | Application | Read (but not change) Exchange settings
 | PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
 | SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
-| MailboxSettings.ReadWrite | Application | Create mailboxes 
 
 **API: Microsoft Graph**<br>
 | Permission | Type | Justification
@@ -123,7 +122,6 @@ $exchangePermissionNames = @(
     'Mailbox.Migration',
     'Organization.Read.All',
     'PeopleSettings.Read.All',
-    'MailboxSettings.ReadWrite',
     'SMTP.SendAsApp',
     'Exchange.ManageAsApp'
 )
