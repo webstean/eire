@@ -47,6 +47,7 @@ via a multi-tenant Application Registration / Enterprise Application in each ten
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 $displayName = 'xxxx-migration-app' ## customise as required
 
@@ -171,6 +172,7 @@ Then perfom an administrator consent for permissions with the following script (
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 ## Administrator consent for Microsoft Graph API calls for migrations
 foreach ($permissionName in $graphPermissionNames) {
@@ -225,6 +227,7 @@ On the assumption, that Access Permissions have been enabled, the Mail.Send perm
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
@@ -254,6 +257,7 @@ Create a migration endpoint (authorised to talk to the source) and then establis
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
@@ -338,6 +342,7 @@ If the mailbox does not already exist, a script can be used to create the Exchan
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$VerbosePreference = 'SilentlyContinue'
 
 $csvPath = '.\mailboxes.csv'
 
