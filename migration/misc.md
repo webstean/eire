@@ -29,13 +29,13 @@ Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
 ## Create a management scope
 $scope = New-ManagementScope `
-    -Name "Migration-Mailbox-Sender" `
-    -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'migration@contoso.com'"
+    -Name "Hub-M365-Mailboxes" `
+    -RecipientRestrictionFilter "Alias -like 'HUB_*'"
 
 ## Add role (part of ExchangeOnlineManagement module)
 New-ManagementRoleAssignment `
     -Name "App-SMTP-SendAsApp-OrgWide" `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" `
-    -CustomResourceScope "$($scope.DisplayName)"
+    -CustomResourceScope "$($scope.Name)"
 ```
