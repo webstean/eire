@@ -221,47 +221,11 @@ foreach ($permissionName in $exchangePermissionNames) {
         -AppRoleId $role.Id
 }
 ```
-
-## **Step 3:** Assign the Exchange Role to send email
-On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following PowerShell script: <br>
-
-```powershell
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-$VerbosePreference = 'SilentlyContinue'
-
-if ( ($null -eq $app) -or ($null -eq $sp) ) {
-    throw 'Critical variables (app and sp) have not been defined - see previous step'
-}
-
-if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
-    Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
-    Install-PSResource `
-        -Name ExchangeOnlineManagement `
-        -Repository PSGallery `
-        -TrustRepository `
-        -Quiet
-}
-Write-Host "Importing Exchange Online module..." -ForegroundColor Cyan
-Import-Module ExchangeOnlineManagement
-
-Write-Host "Interactively connecting to Exchange Online..." -ForegroundColor Cyan
-Connect-ExchangeOnline -ShowBanner:$false
-Write-Host "Connected to Exchange Online." -ForegroundColor Green
-
-## Add role (part of ExchangeOnlineManagement module)
-New-ManagementRoleAssignment `
-    -Name "App-SMTP-SendAsApp-OrgWide" `
-    -Role "Application SMTP.SendAsApp" `
-    -App "$($app.Id)" ## Application ID from above `
-    -CustomResourceScope "$($app.Id)" ## Scope to just the application
-```
-
-## **Step 4:** Verification
+## **Step 3:** Verification
 You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
-## **Step 5:** Create Secret and OIDC Federation
+## **Step 4:** Create Secret and OIDC Federation
 Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
 
 ```text
