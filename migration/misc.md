@@ -33,31 +33,26 @@ $scope = Get-ManagementScope `
 
 if ($null -eq $scope) {
     Write-Host "Creating management scope: $scopeName"
-    $scope = New-ManagementScope `
+
+    New-ManagementScope `
         -Name $scopeName `
         -RecipientRestrictionFilter $filter `
-        -ErrorAction Stop
-}
-else {
+        -ErrorAction Stop | Out-Null
+} else {
     Write-Host "Updating management scope: $scopeName"
-    $scope = Set-ManagementScope `
+
+    Set-ManagementScope `
         -Identity $scopeName `
         -RecipientRestrictionFilter $filter `
         -Confirm:$false `
         -ErrorAction Stop
-
-    $scope = Get-ManagementScope `
-        -Identity $scopeName `
-        -ErrorAction Stop
 }
 
-if ( ($null -eq $app) -or ($null -eq $sp) ) {
-    throw 'Critical variables (app and sp) have not been defined - see previous step'
-}
+$scope = Get-ManagementScope -Identity $scopeName -ErrorAction Stop
 
 ## Add role (part of ExchangeOnlineManagement module)
 New-ManagementRoleAssignment `
-    -Name "App-SMTP-SendAsApp-OrgWide" `
+    -Name "App-SMTP-SendAsApp-for-$($app.DisplayName)" `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" `
     -CustomResourceScope "$($scope.Name)"
