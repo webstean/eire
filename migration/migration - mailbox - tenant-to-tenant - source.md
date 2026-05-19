@@ -253,7 +253,8 @@ Write-Host "Connected to Exchange Online." -ForegroundColor Green
 New-ManagementRoleAssignment `
     -Name "App-SMTP-SendAsApp-OrgWide" `
     -Role "Application SMTP.SendAsApp" `
-    -App "$($app.Id)" ## Application ID from above
+    -App "$($app.Id)" ## Application ID from above `
+    -CustomResourceScope "$($app.Id)" ## Scope to just the application
 ```
 
 ## **Step 4:** Verification
