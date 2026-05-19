@@ -248,7 +248,7 @@ New-ManagementRoleAssignment `
     -App "$($app.Id)" ## Application ID from above
 ```
 
-## DESTINATION tenant: Creation of Migration EndPoint
+## Creation of Migration EndPoint
 Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.
 
 ```powershell
@@ -311,6 +311,12 @@ Simple Mailbox mapping (CSV)
 ```csv
 SourceMailbox,TargetMailbox
 user1@source.com,user1@target.com
+```
+
+A test can be perform to esnure the mailbox is ready for migration
+```powershell
+$migration.MigrationEndpointName = ""
+Test-MigrationServerAvailability -EndPoint $migration.MigrationEndpointName -TestMailbox "[Primary SMTP address of a MailUser in target tenant]"
 ```
 
 A migration file can be automated generated via scripting, for example:-
