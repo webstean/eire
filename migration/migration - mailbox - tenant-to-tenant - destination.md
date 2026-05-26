@@ -16,7 +16,7 @@ All scripts are intended to be run interactively and will required certain authe
 
 ## Permissions
 
-The following are the required permission in the destination tenants:
+The following are the required permission in the destination tenant to support the migration:
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -171,6 +171,7 @@ Write-Host ""
 ```
 ## Step 2: **Perform Administrator Consent**
 Now the correct permissions are assigned, perform an administrator consense for those permissions with the following PowwerShell script.
+This should be executed by the 'Source' tenant, Global Administrator.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
