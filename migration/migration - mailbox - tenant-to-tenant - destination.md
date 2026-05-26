@@ -16,7 +16,7 @@ All scripts are intended to be run interactively and will required certain authe
 
 ## Permissions
 
-The following are the required permission in both the source and destination tenants:
+The following are the required permission in the destination tenants:
 
 **API: Office 365 Exchange Online**<br>
 | Permission | Type | Justification
@@ -41,7 +41,8 @@ The following are the required permission in both the source and destination ten
 | Mail.Send | Application | Send email for status tracking throughout migration (cannot read emails)
 | Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
-via a multi-tenant Application Registration / Enterprise Application in each tenant. 
+This needs to be <u>multi-tenant</u> Application Registration / Enterprise Application in the destination tenant.
+with a suitable certificate/secret and an OIDC federation subject identifier for a suitable Git respository.
 
 ## **Step 1:** Create App Registration / Enterprise Application
 Create the migration application registration and enterprise application with the following PowerShell:
