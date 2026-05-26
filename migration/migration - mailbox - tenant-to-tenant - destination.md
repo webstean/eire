@@ -213,7 +213,7 @@ Then via the portal - create a secret AND an oidc federation (Federated Credenti
 
 ```text
 Scenario: GitHub Action
-Subject Identifier: repo:webstean/eire:ref:refs/heads/main
+Subject Identifier: repo:webstean/eire:ref:refs/heads/main (or any other)
 ```
 <img width="1421" height="610" alt="image" src="https://github.com/user-attachments/assets/43526dfa-11f4-4df1-8489-f68d2e26bb86" />
 <img width="878" height="729" alt="image" src="https://github.com/user-attachments/assets/7c8f673c-44c1-45c8-bcdd-3e164b16fecc" />
@@ -221,7 +221,6 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 
 **Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
-
 
 On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
 
