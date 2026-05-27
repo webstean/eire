@@ -43,7 +43,7 @@ The workstation will need to be configured as follows:
 - Atleast 32Gb of RAM
 - 2 x NICs, with alteast one being 10 GbE (10GBASE-T copper) capable
 - Windows Subsystem for Linux (WSL) installed with an Ubuntu distribution
-- Windows NFS client installed (-FeatureName ServicesForNFS-ClientOnly)
+- Windows NFS client installed (```-FeatureName ServicesForNFS-ClientOnly```)
 - Local administrator rights
 
 > ℹ️ **Recommendation**<br>
@@ -78,13 +78,14 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
 
-1. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
-2. This NFS export will then be mounted, either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
-3. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
-4. Initial: Perform a Copy of the entire to NFS export to the DataBox share.
-5. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
-6. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
-7. Incremental: Perform a rsync incremental, leveraging the previously created metadata file
+1. A completed 'tenant configuration' as outline [here]().
+2. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
+3. This NFS export will then be mounted, either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
+4. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
+5. Initial: Perform a Copy of the entire to NFS export to the DataBox share.
+6. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
+7. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
+8. Incremental: Perform a rsync incremental, leveraging the previously created metadata file
 
 Repeat incremental as many times as required.
 
