@@ -1,8 +1,8 @@
-# NAS via Azure Data Box/Disk
+# NAS via Azure Data Box/Disk (Draft for POC)
 
-## Objective
+## Technical Objective
 
-Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Disk devices, when can then be shipped to Microsoft/Azure to be uploaded into a Jefferies (JV) hosted Azure Storage Account (Azure Files), from there it can be imported into Jefferies (JV) SharePoint sites, via the [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool) toolset and if require import PST files into Microsoft 365 mailboxes via the 'free' M365 Import Service (apart of Purview).
+Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Disk devices inside a source tenant, when can then be physically shipped to Microsoft/Azure to be uploaded into a destinaton (JV) tenant hosting an Azure Premium Storage Account configured with Azure Files, from there it can be imported into the destination tenant SharePoint sites/libraries, via the [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool) toolset and if require import PST files into Microsoft 365 mailboxes via the 'free' M365 Import Service (apart of Purview).
 
 ## Required Source Confguration Details
 
@@ -28,30 +28,39 @@ isi nfs exports list
 
 ```
 3. A precise sizing (number of files, number of folders & the total size) per NFS export for each each NFS export to migrated.
-4. Confirm with the NAS SME (Subject Matter Experts) to confirm that a filesystem level readonly snapshot can be created for each NFS export on the NAS device, and that you can configure a separate NFS export to permit a client to mount that Snapshot (readonly). We are currently assuming this is achieavable, if it is not possible, then we need to develop some alternative approaches.  
+4. Confirm with the source tenant NAS SME (Subject Matter Experts) that a filesystem level readonly snapshot can be created for each NFS export on the NAS device, and that you can configure a separate NFS export to permit a client to mount that Snapshot (readonly). We are currently assuming this is achieavable, if it is not possible, then we need to develop some alternative approaches.  
 
-## Source: Physical Device Setup
+## Source: Physical Workstation
 
 The source tenant will host a workstation (including corporate virus protection software) with dual network adapters.<br>
 One network adapter will be connected to the corporate network with access to the NAS device.<br>
 Second network adapter will be connected to a private network to the Azure Data Box<br>
 
 The workstation will need to be configured as follows:
-- Active Corporate image/SOE for Windows 2022 (or Windows 11)
+- Active Corporate image/SOE with Microsoft Windows 2022 (or Microsoft Windows 11)
 - Atleast 1 CPU Socket with 4 Cores (8 Cores preferred)
 - Atleast 1 Terabyte local disk (Drive C:) hosted on a SSD (solid state disk)
 - Atleast 32Gb of RAM
-- Physical connection to the Azure Data Box
+- 2 x NICs, with alteast one being 10 GbE (10GBASE-T copper) capable
+- Windows Subsystem for Linux (WSL) installed with an Ubuntu distribution
+- Windows NFS client installed (-FeatureName ServicesForNFS-ClientOnly)
+- Local administrator rights
 
-## Azure Data Box
+> ℹ️ **Recommendation**<br>
+> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
+> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
+
+## Source: Azure Data Box
+
+> Azure Data Box Next-Gen devices are now available with no service fee and no shipping fee when using Microsoft managed shipping.<br>
+> Extra day fee may apply for devices that are not returned within the allotted usage period.
 
 The latest Azure Data Box (Next Gen) is availalbe in Available in 2 storage sizes: *SKU 1* - *120 TB* usable (150 TB raw) and *SKU 2* - *525 TB* usable (600 TB raw)<br>
 The device itself is 7 RU (U) when placed in the rack on its side (cannot be rack-mounted), so it must sit on a shelf<br>
 <img width="700" height="497" alt="image" src="https://github.com/user-attachments/assets/ea258b85-370e-463b-b10d-c4abf4365c74" />
 
-- 
-# Cabling required:
-- 1 X power cable (included by Microsoft)
+# Azure DataBox Cabling requirement
+- 1 X power cable (included from Microsoft)
 - 2 X 10G-BaseT RJ45 cables(CAT-5e or CAT6) (not included, needs to be supplied by source tenant)
 - 2 X 100-GbE QSFP28 passive direct attached cable (not included, needs to be supplied by source tenant). 
 Either the copper (10G-BASET) or twinaux (DAC/passive direct attached) can be utilised for the connection to the workstation.<br>
@@ -59,26 +68,97 @@ Realistically, unless the workstation is capable of hosting 100-GbE QSFP28 netwo
 However, there is probably no reasonable need to have load-balancing/failover between the workstation and the Data Box.<br>
 So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required to physically connect the workstation and Azure Data Box.<br>
 
-
-
-| Reference Material | Japanese  | English
+| Technical Reference Material | Japanese  | English
 |---|:--|:---|
 | Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
-| Video on Azure Data Box (Next-Gen) | | [https://www.youtube.com/watch?v=7NXworNZEBw]()
+| Video intorduction to Azure Data Box (Next-Gen) | | [https://www.youtube.com/watch?v=7NXworNZEBw]()
+| Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
+
+## Source: Copying Data to Azure Data Box
+
+The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
+
+1. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
+2. This NFS export will then be mounted, either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
+3. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
+4. Initial: Perform a Copy of the entire to NFS export to the DataBox share.
+5. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
+6. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
+7. Incremental: Perform a rsync incremental, leveraging the previously created metadata file
+
+Repeat incremental as many times as required.
+
+> ℹ️ **PST Files**<br>
+> PST Files will be included in the copies to the Azure Data Box. There is no separate appraoch to PST in the source tenat.
+>
+
+## Destination: Azure Preparation
+
+### Prepare EIRE User Principals (user accounts)
+
+- Create applciable accounts with the Global Reader privilege permanently assigned.
+- Either via PIM or Permanently assign the following roles to the EIRE accounts:
+Role: SharePoint Administrator<br>
+Role: Teams Administrator<br>
+Role: Exchange Administrator<br>
+Role: Microsoft 365 Migration Administrator<br>
+
+### Prepare Azure Files
+1. Create an Azure Management Group (aka migration)
+2. Create a dedicated Azure subscription (recommended - for better isolation) or reuse an existing (which should be empty)
+3. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the manaagement group and/or subscription
+4. If required, block destination tenant admins (Global Administrators etc..) from bring able to access the subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE) individuals actual have access.
+6. Create a Premium Azure Storage Account with Azue Files enabled with the resource group/Subscription/manmagement group - EIRE must be the 'Owner' of this storage account.
+7. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the Azure Data Box.
+
+### Prepare Azure VM
+1. Create an Azure VM
+2. Install Windows 2022 (recommended) or Windows 11
+3. Ensure the standard corporate protection (AV, EDR) are installed or install Microsoft Defender (via extension)
+4. Make the VM available via Azure Bastion (or whatever other service) to EIRE users
+5. Ensure EIRE users are granted local admin to the machine
+6. Install [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool)  
+
+> ℹ️ **Information**<br>
+> Windows Server 2022 is recommended for best performance.<br>
+> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, Single 1TB (SSD) C: Drive<br>
+> The recommended disk type is a single **Premium SSD v2** with ```disk-iops-read-write = 5000 & disk-mbps-read-write = 180```<br>
+
+> ℹ️ **Recommendation**<br>
+> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
+> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
 
 
-1. POC Environment
-2. Migration Procedure
-3. Backup Plan
-4. Testing & Verfication
+### Prepare Windows 365, AVD (VDI) etc..
+1. Provide a standard AVD/VDI machine to EIRE user(s)
+2. Install PowerShell 7.x is enabled and available on the machine.
+3. Ensure the following PowerShell modules are installed:
+- Microsoft.Graph
+- ExchangeOnline
+- SharePointOnline
+- PowrShell.PnP
+
+## Destination: Migration
+
+### Objective
+All the files are now available in the Azure Files (Storage Account) within the destinatiion tenant.<br>
+- The non-PSTs need to be imported into SharePoint
+- The PSTs need to be imported into Exchange Online
+
+### Procedure
+
+#### Access the Azure VM, that has access to the Azure Files.
+- Use SPMT to upload applicable Azure Files share into a library within a the desitnation SharePointr site.
+- Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
+
+#### Access AVD/VDI and perform the following
+- Leverage PowerSHell.Pnp to create the agreed Role-Based access controls in the destination.
+- Adjust SharePoint Libraries to provide the best end-user experience.
+- Develop end-user facing dcoumentation to help users find their files from the migration.
 
 ## Permissions
 The following permissions are required for creating, supporting and operating the migration for the applicable user principals.<br>
-Entra ID Role: Global Reader<br>
-Entra ID Role: SharePoint Administrator<br>
-Entra ID Role: Teams Administrator<br>
-Entra ID Role: Exchange Administrator<br>
-Entra ID Role: Microsoft 365 Migration Administrator<br>
+ID Role: Global Reader<br>
 
 
 ## Procedure for enabling [Microsoft Migration Manager](https://learn.microsoft.com/en-us/sharepointmigration/migrate-to-sharepoint-online)
@@ -90,21 +170,12 @@ Entra ID Role: Microsoft 365 Migration Administrator<br>
 
 1. Prepare a single Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11.
 
-> ℹ️ **Information**<br>
-> Windows Server 2022 is recommended for best performance.<br>
-> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, Single 1TB (SSD) C: Drive<br>
-> If using an Azure hosted VM, then the recommended disk type is a single **Premium SSD v2** with ```disk-iops-read-write = 5000 & disk-mbps-read-write = 180```<br>
-> For optimal performance, one agent should run no more than 30 migration tasks and the service provides no support for assigning a particular tasks to a particular agent.<br>
-> Most migrations, can typically be performed with one agent, supportings tens of Terabytes of data being migrated.<br>
 
 > ℹ️ **Note**<br>
 > By default, Migration Manager uses Microsoft managed Azure Storage Blobs for temporary storage of content and manifest during migration.<br>
 > Customisation of the Azure Storage Blob is possible, but is complex, generally problematic and is not recommended.
 
 
-> ℹ️ **Recommendation**<br>
-> The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
-> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
  
 
 1. Setup certificate-based auth config
