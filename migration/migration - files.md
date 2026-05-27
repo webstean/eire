@@ -1,14 +1,39 @@
-NAS via Azure Data Box/Disk
+# NAS via Azure Data Box/Disk
 
 ## Objective
 
-Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Disk devices, when can then be shipped to Microsoft/Azire to be uploaded into a Jefferies (JV) hosted Azure Storage Account (Azure Files), from there it can be imported into Jefferies (JV) SharePoint sites, via the [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool) toolset and if require import PST files into Microsoft 365 mailboxes via the 
+Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Disk devices, when can then be shipped to Microsoft/Azure to be uploaded into a Jefferies (JV) hosted Azure Storage Account (Azure Files), from there it can be imported into Jefferies (JV) SharePoint sites, via the [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool) toolset and if require import PST files into Microsoft 365 mailboxes via the 'free' M365 Import Service (apart of Purview).
 
+## Required Source Confguration Details
+
+The following information is required to plan and ultimately execute the migration.
+1. The manufacturer, exact model and the exact firmware level of the NAS device. The assumption is that there is only one.
+2. A comprehensive list of all NFS exports to be migrated, include all their mount options (NFS v2, v3 etc..).
+A list of NFS can be obtained as follows:
+NFS client
+```shell
+showmount -e 192.168.1.20 ### This might be unrelaible with NFS v4 or later
+rpcinfo -p emc-nas01          
+```
+NFS server (NAS device)
+```shell
+## varies between models
+
+## EMC VNX / Celerra
+
+
+```
+
+4. A precise sizing (number of files, number of folders & the total size) per NFS export for each each NFS export to migrated.
+
+## 
 
 
 Migration Maager (with Windows Agents)
 Mailbox via native tooling
 
+https://learn.microsoft.com/ja-jp/windows/wsl/install
+https://learn.microsoft.com/en-US/windows/wsl/install
 
 
 1. POC Environment
