@@ -19,21 +19,33 @@ NFS server (NAS device)
 ```shell
 ## varies between models
 
-## EMC VNX / Celerra
-
-
+## EMC VNX / Celerra:
+server_export server_2 -list
+# or
+nas_server -list
+## PowerScale / Isilon:
+isi nfs exports list
 ```
+3. A precise sizing (number of files, number of folders & the total size) per NFS export for each each NFS export to migrated.
 
-4. A precise sizing (number of files, number of folders & the total size) per NFS export for each each NFS export to migrated.
+## Source: Physical Device Setup
 
-## 
+The source tenant will host a workstation (including corporate virus protection software) wwith dual network adapters.<br>
+One network adapter will be connected to the corporate network with access to the NAS device.<br>
+Second network adapter will be connected to a private network to the Azure Data Box<br>
+
+The workstation needs to be configured as followed, 
+
 
 
 Migration Maager (with Windows Agents)
 Mailbox via native tooling
 
-https://learn.microsoft.com/ja-jp/windows/wsl/install
-https://learn.microsoft.com/en-US/windows/wsl/install
+
+
+| Procedure | Japanese  | English
+|---|:--|:---|
+| Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
 
 
 1. POC Environment
