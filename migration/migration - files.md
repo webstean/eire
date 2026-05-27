@@ -7,7 +7,8 @@ Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Di
 ## Required Source Confguration Details
 
 The following information is required to plan and ultimately execute the migration.
-1. The manufacturer, exact model and the exact firmware level of the NAS device. The assumption is that there is only one.
+1. A completed 'tenant configuration' that can be obtained by executiing this [script](https://github.com/webstean/eire/blob/main/tenant-configuration/tenant-configuration.ps1) as per this detailed [documentation](https://github.com/webstean/eire/blob/main/tenant-configuration/tenant-configuration.md). 
+2. The manufacturer, exact model and the exact firmware level of the NAS device. The assumption is that there is only one.
 2. A comprehensive list of all NFS exports to be migrated, include all their mount options (NFS v2, v3 etc..).
 A list of NFS can be obtained as follows:
 NFS client
@@ -78,16 +79,53 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
 
-1. A completed 'tenant configuration' as outline [here](https://github.com/webstean/eire/blob/main/tenant-configuration/tenant-configuration.ps1).
-2. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
-3. This NFS export will then be mounted, either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
-4. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
-5. Initial: Perform a Copy of the entire to NFS export to the DataBox share.
-6. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
-7. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
-8. Incremental: Perform a rsync incremental, leveraging the previously created metadata file
+1. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
+2. This NFS export will then be mounted read-only, in either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
+```bash
+## Example NFS mount
+sudo mount -t nfs -o ro,vers=3 nfs-server:/export/path /mnt/nfs-source
+```
+3. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
+4. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
+```bash
+SRC="/mnt/nfs-source/"
+DEST="/mnt/cifs-dest/"
+BASELINE="/mnt/cifs-dest/.baseline-manifest.tsv"
 
-Repeat incremental as many times as required.
+rsync -rlt \
+  --no-owner --no-group \
+  --omit-dir-times \
+  --partial --delay-updates \
+  --info=progress2,stats2 \
+  "$SRC" "$DEST"
+
+cd "$SRC"
+find . -type f -printf '%P\t%s\t%T@\n' | sort > "$BASELINE"```
+```
+5. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
+```bash
+SRC="/mnt/nfs-source/"
+DEST="/mnt/cifs-delta/"
+BASELINE="/path/to/.baseline-manifest.tsv"
+CURRENT="/tmp/current-manifest.tsv"
+CHANGED="/tmp/changed-files.txt"
+
+cd "$SRC"
+
+find . -type f -printf '%P\t%s\t%T@\n' | sort > "$CURRENT"
+
+comm -23 "$CURRENT" "$BASELINE" |
+  cut -f1 > "$CHANGED"
+
+rsync -rlt \
+  --no-owner --no-group \
+  --omit-dir-times \
+  --partial --delay-updates \
+  --files-from="$CHANGED" \
+  "$SRC" "$DEST"
+```
+
+Repeat incremental as many times as required, with a new Azure Data Box.
 
 > ℹ️ **PST Files**<br>
 > PST Files will be included in the copies to the Azure Data Box. There is no separate appraoch to PST in the source tenat.
@@ -97,8 +135,8 @@ Repeat incremental as many times as required.
 
 ### Prepare EIRE User Principals (user accounts)
 
-- Create applciable accounts with the Global Reader privilege permanently assigned.
-- Either via PIM or Permanently assign the following roles to the EIRE accounts:
+- Create applicable accounts with the Global Reader privilege permanently assigned.
+- Either via PIM or Permanently assign the following roles must be assigned to EIRE accounts:
 Role: SharePoint Administrator<br>
 Role: Teams Administrator<br>
 Role: Exchange Administrator<br>
@@ -137,7 +175,7 @@ Role: Microsoft 365 Migration Administrator<br>
 - Microsoft.Graph
 - ExchangeOnline
 - SharePointOnline
-- PowrShell.PnP
+- PowerShell.PnP
 
 ## Destination: Migration
 
@@ -157,353 +195,3 @@ All the files are now available in the Azure Files (Storage Account) within the 
 - Adjust SharePoint Libraries to provide the best end-user experience.
 - Develop end-user facing dcoumentation to help users find their files from the migration.
 
-## Permissions
-The following permissions are required for creating, supporting and operating the migration for the applicable user principals.<br>
-ID Role: Global Reader<br>
-
-
-## Procedure for enabling [Microsoft Migration Manager](https://learn.microsoft.com/en-us/sharepointmigration/migrate-to-sharepoint-online)
-
-> ℹ️ **Limitations**<br>
-> Microsoft Migration Manager is intended for SMB/CIFS file share migrations (plus other 3rd part cloud providers) to SharePoint libraries<br>
-> It **does not** officially support NFS - but if the NFS export (dependencies on export options, NFS versions) can be mounted on a Windows then it typically be be migrated.<br>
-> SharePoint destinations paths are limited to 400 characters (including both path and filename/extension) - this include the name of the destination SharePoint library.<br> 
-
-1. Prepare a single Windows VM/server - must be one of Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 or Windows 11.
-
-
-> ℹ️ **Note**<br>
-> By default, Migration Manager uses Microsoft managed Azure Storage Blobs for temporary storage of content and manifest during migration.<br>
-> Customisation of the Azure Storage Blob is possible, but is complex, generally problematic and is not recommended.
-
-
- 
-
-1. Setup certificate-based auth config
-```powershell
-function New-MigrationManagerCertificateAuthConfigFile {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $false)]
-        [string]$TenantId = "$env:AZURE_TENANT_ID",
-
-        [Parameter(Mandatory = $false)]
-        [string]$ClientId = "$env:AZURE_CLIENT_ID",
-
-        [Parameter(Mandatory)]
-        [string]$SharePointAdminUrl,
-
-        [Parameter(Mandatory)]
-        [string]$CertificateThumbprint,
-
-        [Parameter()]
-        [string]$OutputPath = '.\migration-manager-cba-config.json'
-    )
-
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = 'Stop'
-
-    $cert = Get-ChildItem -Path Cert:\CurrentUser\My |
-        Where-Object Thumbprint -eq $CertificateThumbprint |
-        Select-Object -First 1
-
-    if (-not $cert) {
-        throw "Certificate not found in CurrentUser\My: $CertificateThumbprint"
-    }
-
-    $config = [ordered]@{
-        Thumbprint = $CertificateThumbprint
-        TenantId   = $TenantId
-        ClientId   = $ClientId
-        AdminUrl   = $SharePointAdminUrl
-    }
-
-    $config |
-        ConvertTo-Json -Depth 5 |
-        Set-Content -LiteralPath $OutputPath -Encoding utf8
-
-    Write-Host "Created config: $((Resolve-Path -LiteralPath $OutputPath).Path)"
-}
-```
-2. Install / Verify agent service/files
-```powershell
-function Install-MigrationManagerAgentPrereqs {
-    [CmdletBinding()]
-    param(
-        [Parameter()]
-        [int]$MinimumFreeSpaceGB = 500
-    )
-
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = 'Stop'
-
-    $os = Get-CimInstance Win32_OperatingSystem
-    if ($os.Caption -notmatch 'Windows Server 2016|Windows Server 2019|Windows Server 2022|Windows 10|Windows 11') {
-        throw "Unsupported OS: $($os.Caption)"
-    }
-
-    $dotNetRelease = Get-ItemPropertyValue `
-        -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' `
-        -Name Release `
-        -ErrorAction Stop
-
-    if ($dotNetRelease -lt 394802) {
-        throw '.NET Framework 4.6.2 or later is required.'
-    }
-
-    $systemDrive = Get-PSDrive -Name $env:SystemDrive.TrimEnd(':')
-    $freeGB = [math]::Round($systemDrive.Free / 1GB, 2)
-
-    if ($freeGB -lt $MinimumFreeSpaceGB) {
-        throw "Insufficient free disk space. Required: $MinimumFreeSpaceGB GB. Found: $freeGB GB."
-    }
-
-    Write-Host "Prerequisites look OK."
-}
-
-function Install-MigrationManagerAgent {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$InstallerPath,
-
-        [Parameter()]
-        [string]$CertificateAuthConfigPath = '.\migration-manager-cba-config.json'
-    )
-
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = 'Stop'
-
-    if (-not (Test-Path -LiteralPath $InstallerPath -PathType Leaf)) {
-        throw "Installer not found: $InstallerPath"
-    }
-
-    if ($CertificateAuthConfigPath -and -not (Test-Path -LiteralPath $CertificateAuthConfigPath -PathType Leaf)) {
-        throw "Certificate auth config not found: $CertificateAuthConfigPath"
-    }
-
-    Install-MigrationManagerAgentPrereqs
-
-    Write-Host "Launching Migration Manager agent installer..."
-    Write-Host "Installer: $InstallerPath"
-
-    if ($CertificateAuthConfigPath) {
-        Write-Host "Use Certificate Authentication and select:"
-        Write-Host $CertificateAuthConfigPath
-    }
-
-    $process = Start-Process `
-        -FilePath $InstallerPath `
-        -Wait `
-        -PassThru
-
-    if ($process.ExitCode -ne 0) {
-        throw "Installer exited with code $($process.ExitCode)"
-    }
-
-    Write-Host "Installer completed."
-}
-```
-
-3. Use Migration Manager PowerShell to create tasks
-
-```powershell
-function Invoke-MigrationManagerFileShareMigration {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$TenantName,
-
-        [Parameter(Mandatory)]
-        [string]$CsvPath,
-
-        [Parameter()]
-        [string]$MigrationManagerModulePath = 'C:\Program Files\Migration Manager\Microsoft.SharePoint.MigrationManager.PowerShell.dll',
-
-        [Parameter()]
-        [string]$AgentGroup = 'Default',
-
-        [Parameter()]
-        [datetime]$ScheduleStartTime = (Get-Date).AddMinutes(5),
-
-        [Parameter()]
-        [switch]$DownloadReports
-    )
-
-    <#
-    CSV FORMAT:
-
-    TaskName,SourceUri,TargetSiteUrl,TargetListName
-    Finance Shared Drive,\\fileserver\finance,https://contoso.sharepoint.com/sites/Finance,Documents
-    HR Shared Drive,\\fileserver\hr,https://contoso.sharepoint.com/sites/HR,Documents
-    #>
-
-    Set-StrictMode -Version Latest
-    $ErrorActionPreference = 'Stop'
-
-    try {
-
-        #
-        # Validate module
-        #
-        if (-not (Test-Path -LiteralPath $MigrationManagerModulePath -PathType Leaf)) {
-            throw "Migration Manager PowerShell module not found: $MigrationManagerModulePath"
-        }
-
-        Write-Host ''
-        Write-Host '=== Loading Migration Manager PowerShell Module ==='
-
-        Import-Module $MigrationManagerModulePath -Force
-
-        #
-        # Validate CSV
-        #
-        if (-not (Test-Path -LiteralPath $CsvPath -PathType Leaf)) {
-            throw "CSV file not found: $CsvPath"
-        }
-
-        $tasks = Import-Csv -LiteralPath $CsvPath
-
-        if (-not $tasks) {
-            throw "CSV contains no migration tasks."
-        }
-
-        #
-        # Connect
-        #
-        Write-Host ''
-        Write-Host "=== Connecting to Migration Manager Tenant: $TenantName ==="
-
-        Connect-MigrationService `
-            -Tenant $TenantName
-
-        #
-        # Create Tasks
-        #
-        Write-Host ''
-        Write-Host '=== Creating Migration Tasks ==='
-
-        $createdTasks = @()
-
-        foreach ($task in $tasks) {
-
-            if ([string]::IsNullOrWhiteSpace($task.TaskName)) {
-                throw 'TaskName missing in CSV.'
-            }
-
-            if ([string]::IsNullOrWhiteSpace($task.SourceUri)) {
-                throw "SourceUri missing for task: $($task.TaskName)"
-            }
-
-            if ([string]::IsNullOrWhiteSpace($task.TargetSiteUrl)) {
-                throw "TargetSiteUrl missing for task: $($task.TaskName)"
-            }
-
-            if ([string]::IsNullOrWhiteSpace($task.TargetListName)) {
-                throw "TargetListName missing for task: $($task.TaskName)"
-            }
-
-            Write-Host ''
-            Write-Host "Creating task: $($task.TaskName)"
-            Write-Host "  Source : $($task.SourceUri)"
-            Write-Host "  Target : $($task.TargetSiteUrl)"
-            Write-Host "  Library: $($task.TargetListName)"
-
-            $migrationTask = Add-MigrationTask `
-                -TaskName $task.TaskName `
-                -SourceUri $task.SourceUri `
-                -TargetSiteUrl $task.TargetSiteUrl `
-                -TargetListName $task.TargetListName `
-                -ScheduleStartTime $ScheduleStartTime `
-                -AgentGroup $AgentGroup `
-                -Tags @(
-                    'PowerShell',
-                    'Automated'
-                )
-
-            $createdTasks += $migrationTask
-
-            Write-Host "Task created successfully."
-        }
-
-        #
-        # Summary
-        #
-        Write-Host ''
-        Write-Host '=== Migration Tasks Created ==='
-
-        foreach ($createdTask in $createdTasks) {
-
-            Write-Host (
-                '{0,-40} {1}' -f `
-                $createdTask.TaskName,
-                $createdTask.Status
-            )
-        }
-
-        #
-        # Optional Report Download
-        #
-        if ($DownloadReports) {
-
-            $reportRoot = Join-Path `
-                -Path $env:TEMP `
-                -ChildPath ('MigrationManagerReports_' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
-
-            New-Item `
-                -ItemType Directory `
-                -Path $reportRoot `
-                -Force | Out-Null
-
-            Write-Host ''
-            Write-Host "=== Downloading Reports to: $reportRoot ==="
-
-            foreach ($createdTask in $createdTasks) {
-
-                try {
-
-                    $safeTaskName = (
-                        $createdTask.TaskName `
-                            -replace '[\\/:*?"<>|]', '_'
-                    )
-
-                    $scanReportPath = Join-Path `
-                        -Path $reportRoot `
-                        -ChildPath "$safeTaskName-scan.csv"
-
-                    $migrationReportPath = Join-Path `
-                        -Path $reportRoot `
-                        -ChildPath "$safeTaskName-migration.csv"
-
-                    Write-Host ''
-                    Write-Host "Downloading reports for: $($createdTask.TaskName)"
-
-                    Get-ScanReport `
-                        -TaskId $createdTask.TaskId `
-                        -OutputPath $scanReportPath
-
-                    Get-MigrationReport `
-                        -TaskId $createdTask.TaskId `
-                        -OutputPath $migrationReportPath
-
-                    Write-Host 'Reports downloaded.'
-                }
-                catch {
-                    Write-Warning "Failed downloading reports for task: $($createdTask.TaskName)"
-                    Write-Warning $_.Exception.Message
-                }
-            }
-
-            Write-Host ''
-            Write-Host "Reports available at: $reportRoot"
-        }
-
-        Write-Host ''
-        Write-Host '=== Migration Submission Complete ==='
-    }
-    catch {
-        Write-Error $_
-        throw
-    }
-}
-```
