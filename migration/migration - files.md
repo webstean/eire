@@ -78,7 +78,7 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
 
-1. A completed 'tenant configuration' as outline [here]().
+1. A completed 'tenant configuration' as outline [here](https://github.com/webstean/eire/blob/main/tenant-configuration/tenant-configuration.ps1).
 2. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
 3. This NFS export will then be mounted, either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
 4. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
