@@ -25,27 +25,46 @@ server_export server_2 -list
 nas_server -list
 ## PowerScale / Isilon:
 isi nfs exports list
+
 ```
 3. A precise sizing (number of files, number of folders & the total size) per NFS export for each each NFS export to migrated.
+4. Confirm with the NAS SME (Subject Matter Experts) to confirm that a filesystem level readonly snapshot can be created for each NFS export on the NAS device, and that you can configure a separate NFS export to permit a client to mount that Snapshot (readonly). We are currently assuming this is achieavable, if it is not possible, then we need to develop some alternative approaches.  
 
 ## Source: Physical Device Setup
 
-The source tenant will host a workstation (including corporate virus protection software) wwith dual network adapters.<br>
+The source tenant will host a workstation (including corporate virus protection software) with dual network adapters.<br>
 One network adapter will be connected to the corporate network with access to the NAS device.<br>
 Second network adapter will be connected to a private network to the Azure Data Box<br>
 
-The workstation needs to be configured as followed, 
+The workstation will need to be configured as follows:
+- Active Corporate image/SOE for Windows 2022 (or Windows 11)
+- Atleast 1 CPU Socket with 4 Cores (8 Cores preferred)
+- Atleast 1 Terabyte local disk (Drive C:) hosted on a SSD (solid state disk)
+- Atleast 32Gb of RAM
+- Physical connection to the Azure Data Box
+
+## Azure Data Box
+
+The latest Azure Data Box (Next Gen) is availalbe in Available in 2 storage sizes: *SKU 1* - *120 TB* usable (150 TB raw) and *SKU 2* - *525 TB* usable (600 TB raw)<br>
+The device itself is 7 RU (U) when placed in the rack on its side (cannot be rack-mounted), so it must sit on a shelf<br>
+<img width="700" height="497" alt="image" src="https://github.com/user-attachments/assets/ea258b85-370e-463b-b10d-c4abf4365c74" />
+
+- 
+# Cabling required:
+- 1 X power cable (included by Microsoft)
+- 2 X 10G-BaseT RJ45 cables(CAT-5e or CAT6) (not included, needs to be supplied by source tenant)
+- 2 X 100-GbE QSFP28 passive direct attached cable (not included, needs to be supplied by source tenant). 
+Either the copper (10G-BASET) or twinaux (DAC/passive direct attached) can be utilised for the connection to the workstation.<br>
+Realistically, unless the workstation is capable of hosting 100-GbE QSFP28 network adapters, the connectivity is recommended to be via 2 x 10G-BASE-T (copper) cables.<br>
+However, there is probably no reasonable need to have load-balancing/failover between the workstation and the Data Box.<br>
+So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required to physically connect the workstation and Azure Data Box.<br>
 
 
 
-Migration Maager (with Windows Agents)
-Mailbox via native tooling
-
-
-
-| Procedure | Japanese  | English
+| Reference Material | Japanese  | English
 |---|:--|:---|
 | Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
+| Video on Azure Data Box (Next-Gen) | | [https://www.youtube.com/watch?v=7NXworNZEBw]()
 
 
 1. POC Environment
