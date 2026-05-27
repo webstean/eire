@@ -18,7 +18,7 @@ However, since these accounts are readonly, higher prvileges are required to act
 These setup scripts are intended to be run interactively (by a human) and will required certain authentication consents to already be enabled or to be enabled during execution.<br>
 
 > ℹ️ **Recommendation**<br>
-> It is recommended that these stesp by performed by the source tenant's 'Global Administrator' <br>
+> It is recommended that these steps be performed by the source tenant's 'Global Administrator' <br>
 >
 
 ## Permissions Overview
