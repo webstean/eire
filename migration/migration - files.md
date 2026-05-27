@@ -1,4 +1,12 @@
-NAS via Migration Maager (with Windows Agents)
+NAS via Azure Data Box/Disk
+
+## Objective
+
+Copy the contents of a number of NAS NFS exports to a physical Azure Data Box/Disk devices, when can then be shipped to Microsoft/Azire to be uploaded into a Jefferies (JV) hosted Azure Storage Account (Azure Files), from there it can be imported into Jefferies (JV) SharePoint sites, via the [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool) toolset and if require import PST files into Microsoft 365 mailboxes via the 
+
+
+
+Migration Maager (with Windows Agents)
 Mailbox via native tooling
 
 
