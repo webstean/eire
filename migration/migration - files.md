@@ -158,7 +158,7 @@ The creation of the file migration service principals is outline [here](https://
 10. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the import of the Azure Data Box.
 
 > ℹ️ **Important**<br>
-> At a minimal, these steps must be performed befoe the Azure Data Box is order!
+> At a minimum, these steps must be performed befoe the Azure Data Box can be ordered!
 >
 
 ### Prepare Azure VM
