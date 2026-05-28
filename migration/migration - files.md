@@ -143,28 +143,33 @@ Role: Exchange Administrator<br>
 Role: Microsoft 365 Migration Administrator<br>
 
 ### Prepare Migration Service Principals
-The creation of the file migration service principals is outline [here]()
+The creation of the file migration service principals is outline [here](https://github.com/webstean/eire/blob/main/migration/migration%20-%20mailbox%20-%20tenant-to-tenant%20-%20destination.md)
 
 ### Prepare Azure Resources
 1. Create a dedicated 'Azure Management Group' (called migration or similar)
-2. Create a dedicated Azure subscription (recommended for better isolation) or reuse an existing (which should be empty)
-3. Move the subscription under that 'migration' management group in the hierarchy
+2. Create a dedicated 'Azure subscription' (recommended for better isolation) or reuse an existing (which should be empty)
+3. Move the 'Azure Subscription' under that 'migration' 'Azure Management Group' in the destination tenant's hierarchy
 4. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the manaagement group and/or subscription
-5. If required, block destination tenant admins (Global Administrators etc..) from bring able to access the management group/subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE/project/security) individuals/service principal actual have access.
+5. If required, block destination tenant admins (Global Administrators etc..) from being able to access the management group/subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE/project/nominated security) individuals/service principal actual have access.
 6. Create a single Azure VNet and subnets in the preferred zone
 7. Create a Azure Storage Account (Preferred storage type: Azure Files, Performance: Premium, Premium Account Type: File Shars, Redunancy: LRS or higher)
-8. Ensure EIRE principals (user or service)  is assgied as the owner of the Storage Account.
-9. Highly recommendeded, create a Private Endpoint to this Storage Account to a dedicated subnet (private-endpoint) within the single VNet, and disabled external access to the Storage Account.
+8. Ensure EIRE principals (user or service) is assgied as the owner of the Storage Account.
+9. Highly recommendeded: Create a Private Endpoint to this Storage Account via a dedicated subnet (private-endpoint) within the single VNet, and disabled external access to the Storage Account.
 10. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the import of the Azure Data Box.
 
+> ℹ️ **Important**<br>
+> At a minimal, these steps must be performed befoe the Azure Data Box is order!
+>
+
 ### Prepare Azure VM
-1. Within the management/subscriptin/resource group above/Create a single Azure VM
+1. Within the management group/subscription/resource group create as per above, Create a single Azure VM
 2. The Azure VM will need to be install Windows Server 2022 (recommended) or Windows 11
-3. Ensure the standard corporate protection (AV, EDR) are installed or install Microsoft Defender (via extension)
-4. Enusre the VM has network access to the storage acocunt, created above.
-5. Ensure the new VM is available via Azure Bastion, AVD or Windows 365 (or whatever external access solution you use) to the external EIRE users
-6. Ensure EIRE users are granted local admin to the machine
-7. Install [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool)  
+3. Ensure the standard corporate protection (AV, EDR) are installed or altrnaitvely install Microsoft Defender (via VM extension)
+4. Ensure the VM has network access to the storage account, that was created above. It's NIC should be in the same VNet creatred above.
+5. Enusre the VM has outbound network access to the Internet via whatever applicable proxy/firewall is being utilised. EIRE does not recommend the use of a Azure NGS/VM specific firewall rules, if a suitably robust proxy/firewall solution is already in place.  
+6. Ensure the new VM is available via Azure Bastion, AVD or Windows 365 (or whatever external access solution you use) to the nominated external EIRE users
+7. Ensure EIRE users are granted local admin to the Azure VM
+9. Ensure that SharePoint Migration tool is (installed)[this procedure](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool)  
 
 > ℹ️ **Information**<br>
 > Windows Server 2022 is recommended for the best performance.<br>
@@ -184,18 +189,19 @@ The creation of the file migration service principals is outline [here]()
 - SharePointOnline
 - PnP.PowerShell
 
-This machine will be utilise for implement the agreed security scheme for the SharePoint site(s) typically via PnP.PowerShell with ad-hoc scripts.
+> ℹ️ **Information**<br>
+> This machine will be utilised for implementing the agreed security scheme for the SharePoint site(s) typically via PnP.PowerShell with ad-hoc scripts.
 
-## Destination: Migration
+## Destination: File/PST Migration Procedures
 
 ### Objective
 All the files are now available in the Azure Files (Storage Account) within the destination tenant.<br>
-- The non-PSTs need to be imported into SharePoint
+- The non-PSTs will need to be imported into the nominated SharePoint site (or sites)
 - The PSTs need to be imported into Exchange Online
 
-### Procedure
+### Procedures
 
-#### Access the Azure VM, that has access to the Azure Files.
+#### Uploading files (non-PSTs) into SharePoint
 - Use SPMT to upload applicable Azure Files share into a library within a the desitnation SharePointr site.
 ```powershell
 [CmdletBinding()]
@@ -220,10 +226,12 @@ Add-SPMTTask -FileShareSource $SourcePath -TargetSiteUrl $TargetSiteUrl -TargetL
 Start-SPMTMigration -ErrorAction Stop
 ```
 
+#### Uploading PSTs into Exchange Online
+
 - Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
 
 
-#### Access AVD/VDI and perform the following
+#### Implement agreed security model
 - Leverage PowerSHell.Pnp to create the agreed Role-Based access controls in the destination.
 - Adjust SharePoint Libraries to provide the best end-user experience.
 - Develop end-user facing dcoumentation to help users find their files from the migration.
