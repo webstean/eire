@@ -136,51 +136,60 @@ Repeat incremental as many times as required, with a new Azure Data Box.
 ### Prepare EIRE User Principals (user accounts)
 
 - Create applicable accounts with the Global Reader privilege permanently assigned.
-- Either via PIM or Permanently assign the following roles must be assigned to EIRE accounts:
+- Either via PIM or Permanently assign the following roles to the applicable EIRE accounts:
 Role: SharePoint Administrator<br>
 Role: Teams Administrator<br>
 Role: Exchange Administrator<br>
 Role: Microsoft 365 Migration Administrator<br>
 
-### Prepare Azure Files
-1. Create an Azure Management Group (aka migration)
-2. Create a dedicated Azure subscription (recommended - for better isolation) or reuse an existing (which should be empty)
-3. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the manaagement group and/or subscription
-4. If required, block destination tenant admins (Global Administrators etc..) from bring able to access the subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE) individuals actual have access.
-6. Create a Premium Azure Storage Account with Azue Files enabled with the resource group/Subscription/manmagement group - EIRE must be the 'Owner' of this storage account.
-7. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the Azure Data Box.
+### Prepare Migration Service Principals
+The creation of the file migration service principals is outline [here]()
+
+### Prepare Azure Resources
+1. Create a dedicated 'Azure Management Group' (called migration or similar)
+2. Create a dedicated Azure subscription (recommended for better isolation) or reuse an existing (which should be empty)
+3. Move the subscription under that 'migration' management group in the hierarchy
+4. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the manaagement group and/or subscription
+5. If required, block destination tenant admins (Global Administrators etc..) from bring able to access the management group/subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE/project/security) individuals/service principal actual have access.
+6. Create a single Azure VNet and subnets in the preferred zone
+7. Create a Azure Storage Account (Preferred storage type: Azure Files, Performance: Premium, Premium Account Type: File Shars, Redunancy: LRS or higher)
+8. Ensure EIRE principals (user or service)  is assgied as the owner of the Storage Account.
+9. Highly recommendeded, create a Private Endpoint to this Storage Account to a dedicated subnet (private-endpoint) within the single VNet, and disabled external access to the Storage Account.
+10. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the import of the Azure Data Box.
 
 ### Prepare Azure VM
-1. Create an Azure VM
-2. Install Windows 2022 (recommended) or Windows 11
+1. Within the management/subscriptin/resource group above/Create a single Azure VM
+2. The Azure VM will need to be install Windows Server 2022 (recommended) or Windows 11
 3. Ensure the standard corporate protection (AV, EDR) are installed or install Microsoft Defender (via extension)
-4. Make the VM available via Azure Bastion (or whatever other service) to EIRE users
-5. Ensure EIRE users are granted local admin to the machine
-6. Install [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool)  
+4. Enusre the VM has network access to the storage acocunt, created above.
+5. Ensure the new VM is available via Azure Bastion, AVD or Windows 365 (or whatever external access solution you use) to the external EIRE users
+6. Ensure EIRE users are granted local admin to the machine
+7. Install [SPMT](https://learn.microsoft.com/en-us/sharepointmigration/introducing-the-sharepoint-migration-tool)  
 
 > ℹ️ **Information**<br>
-> Windows Server 2022 is recommended for best performance.<br>
-> Hardware Configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, Single 1TB (SSD) C: Drive<br>
+> Windows Server 2022 is recommended for the best performance.<br>
+> Minimal hardware configuration: 2 x vCPU, 4x vSockets per vCPU (Total of 8 vSockets), 16GB of RAM, Single 1TB (SSD) C: Drive<br>
 > The recommended disk type is a single **Premium SSD v2** with ```disk-iops-read-write = 5000 & disk-mbps-read-write = 180```<br>
 
 > ℹ️ **Recommendation**<br>
 > The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
-> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
-
+> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing as usual protections.
 
 ### Prepare Windows 365, AVD (VDI) etc..
-1. Provide a standard AVD/VDI machine to EIRE user(s)
-2. Install PowerShell 7.x is enabled and available on the machine.
+1. Provide a standard AVD/VDI/Windows 365 machine to EIRE user(s)
+2. Ensure that PowerShell 7.x is installed and fully enabled (if constrained mode is enabled, it must be in audit mode)
 3. Ensure the following PowerShell modules are installed:
 - Microsoft.Graph
 - ExchangeOnline
 - SharePointOnline
-- PowerShell.PnP
+- PnP.PowerShell
+
+This machine will be utilise for implement the agreed security scheme for the SharePoint site(s) typically via PnP.PowerShell with ad-hoc scripts.
 
 ## Destination: Migration
 
 ### Objective
-All the files are now available in the Azure Files (Storage Account) within the destinatiion tenant.<br>
+All the files are now available in the Azure Files (Storage Account) within the destination tenant.<br>
 - The non-PSTs need to be imported into SharePoint
 - The PSTs need to be imported into Exchange Online
 
@@ -188,7 +197,31 @@ All the files are now available in the Azure Files (Storage Account) within the 
 
 #### Access the Azure VM, that has access to the Azure Files.
 - Use SPMT to upload applicable Azure Files share into a library within a the desitnation SharePointr site.
+```powershell
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory)]
+  [string] $SourcePath,
+
+  [Parameter(Mandatory)]
+  [string] $TargetSiteUrl,
+
+  [Parameter(Mandatory)]
+  [string] $TargetLibraryName,
+
+  [string] $TargetFolder = ""
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+Import-Module Microsoft.SharePoint.MigrationTool.PowerShell -ErrorAction Stop
+
+Register-SPMTMigration -SPOCredential (Get-Credential -Message "SharePoint Online admin/site admin credential") -Force -ErrorAction Stop
+Add-SPMTTask -FileShareSource $SourcePath -TargetSiteUrl $TargetSiteUrl -TargetList $TargetLibraryName -TargetListRelativePath $TargetFolder -ErrorAction Stop
+Start-SPMTMigration -ErrorAction Stop
+```
+
 - Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
+
 
 #### Access AVD/VDI and perform the following
 - Leverage PowerSHell.Pnp to create the agreed Role-Based access controls in the destination.
