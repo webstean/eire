@@ -133,23 +133,25 @@ Repeat incremental as many times as required, with a new Azure Data Box.
 
 ## Destination: Azure Preparation
 
-### Prepare EIRE User Principals (user accounts)
+### Prepare Migration User Principals (user accounts)
 
 - Create applicable accounts with the Global Reader privilege permanently assigned.
-- Either via PIM or Permanently assign the following roles to the applicable EIRE accounts:
+- Ideally, the following Entra ID roles, should not be required, but in case the service principal cannot be created, then the following is required.<br>
+Either via PIM or Permanently assign the following roles to the applicable EIRE accounts:<br>
 Role: SharePoint Administrator<br>
 Role: Teams Administrator<br>
 Role: Exchange Administrator<br>
 Role: Microsoft 365 Migration Administrator<br>
 
 ### Prepare Migration Service Principals
+
 The creation of the file migration service principals is outline [here](https://github.com/webstean/eire/blob/main/migration/migration%20-%20mailbox%20-%20tenant-to-tenant%20-%20destination.md)
 
 ### Prepare Azure Resources
 1. Create a dedicated 'Azure Management Group' (called migration or similar)
 2. Create a dedicated 'Azure subscription' (recommended for better isolation) or reuse an existing (which should be empty)
 3. Move the 'Azure Subscription' under that 'migration' 'Azure Management Group' in the destination tenant's hierarchy
-4. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the manaagement group and/or subscription
+4. Assign EIRE as 'Owner' (recommended) or atleast 'Contributor' to the management group and/or subscription
 5. If required, block destination tenant admins (Global Administrators etc..) from being able to access the management group/subscription/resource group with Azure RBAC Deny Assignments, so that only certain (EIRE/project/nominated security) individuals/service principal actual have access.
 6. Create a single Azure VNet and subnets in the preferred zone
 7. Create a Azure Storage Account (Preferred storage type: Azure Files, Performance: Premium, Premium Account Type: File Shars, Redunancy: LRS or higher)
@@ -158,14 +160,14 @@ The creation of the file migration service principals is outline [here](https://
 10. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the import of the Azure Data Box.
 
 > ℹ️ **Important**<br>
-> At a minimum, these steps must be performed befoe the Azure Data Box can be ordered!
+> At a minimum, these steps should be performed befoe the Azure Data Box is ordered!
 >
 
 ### Prepare Azure VM
 1. Within the management group/subscription/resource group create as per above, Create a single Azure VM
 2. The Azure VM will need to be install Windows Server 2022 (recommended) or Windows 11
 3. Ensure the standard corporate protection (AV, EDR) are installed or altrnaitvely install Microsoft Defender (via VM extension)
-4. Ensure the VM has network access to the storage account, that was created above. It's NIC should be in the same VNet creatred above.
+4. Ensure the VM has network access to the storage account, that was created above. It's recommended, that the NIC should be in the same VNet that was created above.
 5. Enusre the VM has outbound network access to the Internet via whatever applicable proxy/firewall is being utilised. EIRE does not recommend the use of a Azure NGS/VM specific firewall rules, if a suitably robust proxy/firewall solution is already in place.  
 6. Ensure the new VM is available via Azure Bastion, AVD or Windows 365 (or whatever external access solution you use) to the nominated external EIRE users
 7. Ensure EIRE users are granted local admin to the Azure VM
@@ -178,7 +180,7 @@ The creation of the file migration service principals is outline [here](https://
 
 > ℹ️ **Recommendation**<br>
 > The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
-> This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing as usual protections.
+> This is to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing as usual protections.
 
 ### Prepare Windows 365, AVD (VDI) etc..
 1. Provide a standard AVD/VDI/Windows 365 machine to EIRE user(s)
@@ -190,7 +192,7 @@ The creation of the file migration service principals is outline [here](https://
 - PnP.PowerShell
 
 > ℹ️ **Information**<br>
-> This machine will be utilised for implementing the agreed security scheme for the SharePoint site(s) typically via PnP.PowerShell with ad-hoc scripts.
+> This machine will be utilised for implementing the agreed security scheme for the SharePoint site(s) typically via PnP.PowerShell utilising scripts.
 
 ## Destination: File/PST Migration Procedures
 
