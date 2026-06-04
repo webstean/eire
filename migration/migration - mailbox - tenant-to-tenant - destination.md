@@ -12,7 +12,7 @@ Since these account are readonly, higher prvileges are required to actually perf
 > All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
 >
 
-All scripts are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
+All setup scripts below are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
 
 ## Permissions
 
