@@ -6,13 +6,15 @@
 This document describes (in detail) how the mailbox migration will be setup and performed.<br>
 
 It is expected, the EIRE user principals (humans) will have atleast the 'Global Reader' Entra ID roles in both the source and destination tenants.<br>
-Since these account are readonly, higher prvileges are required to actually perform the migrations, which is enabled via a Service Principal that is created as per the procedure given below.
+Since these account are readonly, higher prvileges are required to actually perform the migrations.<br>
+Our prefer approach is to use service principals (not user principal) to provide this higher level of access.<br>
+We provide the following scripts to create these service principal, knowns inside Entra ID as 'app registrations' & 'enterprise applications'.
 
 > ℹ️ **Requirement**
 > All logons (User & Service Principals) must be able to satisfy the respective tenant's Conditional Access Policies.
 >
 
-All setup scripts below are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
+The following setup scripts below are intended to be run interactively and will required certain authentication consents to already be enabled or being enabled during execution.<br>
 
 ## Permissions
 
@@ -46,7 +48,7 @@ The following are the required permission in the destination tenant to support t
 | Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
 This needs to be <u>multi-tenant</u> Application Registration / Enterprise Application in the destination tenant.
-with a suitable certificate/secret and an OIDC federation subject identifier for a suitable Git respository.
+with a suitable certificate/secret and ideally an OIDC federation subject identifier for a suitable Git respository.
 
 ## **Step 1:** Create App Registration / Enterprise Application
 Create the migration application registration and enterprise application with the following PowerShell:
@@ -237,6 +239,7 @@ On the assumption, that Access Permissions have been enabled, the Mail.Send perm
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
+$PSDefaultParameterValues['*:Verbose'] = $false
 
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
     Write-Host "Installing Exchange Online PowerShell module..." -ForegroundColor Cyan
@@ -253,15 +256,43 @@ Write-Host "Interactively connecting to Exchange Online..." -ForegroundColor Cya
 Connect-ExchangeOnline -ShowBanner:$false
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
+$scopeName = 'Migration-Notification'
+$filter = "Alias -like 'HUB_*'"
+
+$scope = Get-ManagementScope `
+    -Identity $scopeName `
+    -ErrorAction SilentlyContinue
+
+if ($null -eq $scope) {
+    Write-Host "Creating management scope: $scopeName"
+
+    New-ManagementScope `
+        -Name $scopeName `
+        -RecipientRestrictionFilter $filter `
+        -ErrorAction Stop | Out-Null
+} else {
+    Write-Host "Updating management scope: $scopeName"
+
+    Set-ManagementScope `
+        -Identity $scopeName `
+        -RecipientRestrictionFilter $filter `
+        -Confirm:$false `
+        -ErrorAction Stop
+}
+
+$scope = Get-ManagementScope -Identity $scopeName -ErrorAction Stop
+
 ## Add role (part of ExchangeOnlineManagement module)
 New-ManagementRoleAssignment `
-    -Name "App-SMTP-SendAsApp-OrgWide" `
+    -Name "App-SMTP-SendAsApp-for-$($app.DisplayName)" `
     -Role "Application SMTP.SendAsApp" `
-    -App "$($app.Id)" ## Application ID from above
+    -App "$($app.Id)" `
+    -CustomResourceScope "$($scope.Name)"```
 ```
 
 ## Creation of Migration EndPoint
-Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.
+Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.<br>
+
 
 ```powershell
 Set-StrictMode -Version Latest
