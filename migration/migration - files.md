@@ -160,7 +160,7 @@ The creation of the file migration service principals is outline [here](https://
 10. Record the subscription, resource group and Storage Account resource id to be given to Microsoft/Azure as the destination for the import of the Azure Data Box.
 
 > ℹ️ **Important**<br>
-> At a minimum, these steps should be performed befoe the Azure Data Box is ordered!
+> At a minimum, these steps should be performed before the Azure Data Box is ordered!
 >
 
 ### Prepare Azure VM
@@ -204,7 +204,8 @@ All the files are now available in the Azure Files (Storage Account) within the 
 ### Procedures
 
 #### Uploading files (non-PSTs) into SharePoint
-- Use SPMT to upload applicable Azure Files share into a library within a the desitnation SharePointr site.
+- Use SPMT to upload the contents of the applicable Azure Files share into the SharePoint library within a the destination SharePoint site as per the following<br>
+
 ```powershell
 [CmdletBinding()]
 param(
@@ -231,10 +232,10 @@ Start-SPMTMigration -ErrorAction Stop
 #### Uploading PSTs into Exchange Online
 
 - Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
-
+- The precise procedure is given [here](https://learn.microsoft.com/en-US/purview/pst-import-network-upload)
 
 #### Implement agreed security model
-- Leverage PowerSHell.Pnp to create the agreed Role-Based access controls in the destination.
+- Leverage PowerShell.PnP powershell modules to create the agreed Role-Based access controls in the destination.
 - Adjust SharePoint Libraries to provide the best end-user experience.
-- Develop end-user facing dcoumentation to help users find their files from the migration.
+- Provide end-user facing dcoumentation to help users find their files post-migration.
 
