@@ -46,9 +46,7 @@ The following are the required permission in the source tenant:
 | Organization.Read.All | Application | Read (but not change) organisation information
 | Group.Read.All | Application | Read (but not change) group information (for permission mapping)
 | GroupMember.Read.All | Application | Read (but not change) group membership (for permission mapping)  
-| Sites.Read.All | Application | Read (but not change) sites
 | Mail.Send | Application | Send email for status tracking throughout migration (cannot read emails)
-| Policy.Read.All | Application | Read (but not change) policies including Conditional Access
 
 These permission are required to be grant to a multi-tenant Entra ID Application Registration / Enterprise Application in the source tenant.
 
@@ -96,9 +94,7 @@ $graphPermissionNames = @(
     'Organization.Read.All',
     'Group.Read.All',
     'GroupMember.Read.All',
-    'Mail.Send',
-    'Sites.Read.All',
-    'Policy.Read.All'
+    'Mail.Send'
 )
 $graphSp = Get-MgServicePrincipal `
     -Filter "appId eq '$graphAppId'" `
