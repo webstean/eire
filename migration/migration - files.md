@@ -74,8 +74,8 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 
 | Technical Reference Material | Japanese  | English
 |---|:--|:---|
+| Video introduction to Azure Data Box (Next-Gen) | | [https://www.youtube.com/watch?v=7NXworNZEBw]()
 | Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
-| Video intorduction to Azure Data Box (Next-Gen) | | [https://www.youtube.com/watch?v=7NXworNZEBw]()
 | Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
 
 ## Source: Copying Data to Azure Data Box
