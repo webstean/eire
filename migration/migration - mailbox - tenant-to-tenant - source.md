@@ -253,14 +253,17 @@ Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
 
 ## **Step:** Once migration complete, set Out of Office on old mailboxes.
 
-The migrated mailboxes will need to be recreated - properly as 'Shared Mailboxes' to avoid licensing costs.
+The migrated mailboxes will need to be recreated - properly as 'Shared Mailboxes' to avoid licensing costs.<br>
+This can be performed as per below.<br>
 
-Based a upon a CSV file, for example
+Based a upon a CSV file. For example
 ```csv
 UserPrincipalName,InternalMessage,ExternalMessage
-user1@contoso.com,Migrated to destination.com.,My new email address is newuser1@destination.com 
-user2@contoso.com,Migrated to destination.com.,My new email address is newuser2@destination.com
+user1@sourcetenant.com,Migrated to destination.com.,'Thanks for your email, but please note I have no longer as sourcetenant and my new email address is newuser2@destination.com' 
+user2@sourcetenant.com,Migrated to destination.com.,'Thanks for your email, but please note I have no longer as sourcetenant and my new email address is newuser2@destination.com'
 ```
+
+Run the following PowerShell commmands:-
 
 ```powershell
 function Add-SharedMailboxFromCsv {
