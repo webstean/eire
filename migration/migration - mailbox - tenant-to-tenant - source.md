@@ -232,7 +232,7 @@ or<br>
 ## **Step 4B:** Configure OIDC Federation for the created Enterprise Application
 Via the portal - create a oidc federation (Federated Credentials) for the application registration (as per below)<br>
 [Create a Federated Credential - Microsoft Documentation (English)](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_federated-credential)<br>
-[Create a Federated Credential - Microsoft Documentation (Japanese)](https://learn.microsoft.com/jp-JA/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_federated-credential)<br>
+[Create a Federated Credential - Microsoft Documentation (Japanese)](https://learn.microsoft.com/ja-JP/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_federated-credential)<br>
 
 ```text
 Scenario: GitHub Action
