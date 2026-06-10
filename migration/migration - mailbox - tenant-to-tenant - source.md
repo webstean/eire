@@ -336,7 +336,7 @@ function Set-BulkMailboxOutOfOffice {
 
         Write-Host "Updated OOF for $($_.UserPrincipalName)"
     }
-}```
+}
 ```
 
 
