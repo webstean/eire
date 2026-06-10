@@ -152,7 +152,7 @@ rsync -rlt \
 Repeat incremental as many times as required, with a new Azure Data Box.
 
 > ℹ️ **PST Files**<br>
-> PST Files will be included in the copies to the Azure Data Box. There is no separate appraoch to PST in the source tenat.
+> All PST Files will be included in the copies to the Azure Data Box and will be treated as ordinary files.
 >
 
 ## Destination: Azure Preparation
