@@ -50,6 +50,9 @@ The workstation will need to be configured as follows:
 > ℹ️ **Recommendation**<br>
 > The operating system should be installed with the all the typical corporate AV, EndPoint Protection, SIEM integration, transparent proxy (Zscaler, Netskope etc..) components.<br>
 > This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
+>
+> ℹ️ **Information**<br>
+> The workstation needs to store detailed meta data (created by rsync), in order to do perform incremental copies of data. This data will need to be preserved throughout the duration of the whole migration
 
 ## Source: Azure Data Box
 
