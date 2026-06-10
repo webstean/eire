@@ -80,7 +80,27 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
 
 1. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
-2. This NFS export will then be mounted read-only, in either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
+```bash
+## 1. Create a snapshot
+## Example: NFS export points to: /ifs/data/projects
+##
+isi snapshot snapshots create \
+  --path=/ifs/data/projects \
+  --name=MigrationSnap_20260610
+
+## 2. Verify:
+isi snapshot snapshots list
+# or
+isi snapshot snapshots view MigrationSnap_20260610
+
+## 3. Access the snapshot
+## Snapshots are exposed through the hidden .snapshot directory:
+## 
+/ifs/data/projects/.snapshot/MigrationSnap_20260610
+## You can browse it directly from an NFS client if snapshot access is enabled.
+```
+
+3. This NFS export will then be mounted read-only, in either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
 ```bash
 ## Example NFS mount
 sudo mount -t nfs -o ro,vers=3 nfs-server:/export/path /mnt/nfs-source
