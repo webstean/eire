@@ -256,6 +256,34 @@ Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
 The migrated mailboxes will need to be recreated - properly as 'Shared Mailboxes' to avoid licensing costs.<br>
 This can be performed as per below.<br>
 
+Install the applicable PowerShell module
+```powershell
+Install-PSResource ExchangeOnlineManagement -Scope CurrentUser
+Import-Module ExchangeOnlineManagement
+Get-InstalledModule ExchangeOnlineManagement
+```
+
+Authenticate - Interactively
+```powershell
+Connect-ExchangeOnline
+```
+or<br>
+Authenticate - Interactively (alternative acocunt)
+```powershell
+Connect-ExchangeOnline -UserPrincipalName admin@contoso.com
+```
+or<br>
+Authenticate - Application with Certificate
+```powershell
+Connect-ExchangeOnline -AppId '<AppId>' -CertificateThumbprint '<Thumbprint>' -Organization 'contoso.onmicrosoft.com'
+```
+
+Verfiy Authentication
+```powershell
+Get-EXOMailbox -ResultSize 1
+```
+This should return information on one mailbox.<br>
+
 Based a upon a CSV file. For example
 ```csv
 UserPrincipalName,InternalMessage,ExternalMessage
