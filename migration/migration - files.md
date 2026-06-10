@@ -224,7 +224,7 @@ All the files are now available in the Azure Files (Storage Account) within the 
 
 ### Procedures
 
-#### Uploading files (non-PSTs) into SharePoint
+#### Uploading files into SharePoint
 - Use SPMT to upload the contents of the applicable Azure Files share into the SharePoint library within a the destination SharePoint site as per the following<br>
 
 ```powershell
@@ -250,10 +250,10 @@ Add-SPMTTask -FileShareSource $SourcePath -TargetSiteUrl $TargetSiteUrl -TargetL
 Start-SPMTMigration -ErrorAction Stop
 ```
 
-#### Uploading PSTs into Exchange Online
+#### Uploading PSTs into Exchange Online (if required)
 
 - Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
-- The precise procedure is given [here](https://learn.microsoft.com/en-US/purview/pst-import-network-upload)
+- The precise procedure is given [here - English](https://learn.microsoft.com/en-US/purview/pst-import-network-upload) or [here - Japanese](https://learn.microsoft.com/jp-JA/purview/pst-import-network-upload)  
 
 #### Implement agreed security model
 - Leverage PowerShell.PnP powershell modules to create the agreed Role-Based access controls in the destination.
