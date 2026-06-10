@@ -334,7 +334,7 @@ function Confirm-ModulesAvailable {
 
     foreach ($moduleName in $requiredModules) {
         if (-not (Get-Module -ListAvailable -Name $moduleName)) {
-            throw "Required module '$moduleName' is not installed. Please install it and try again."
+            throw "The required module '$moduleName' is not installed. Please install it and try again."
             return $false
         }
     }
