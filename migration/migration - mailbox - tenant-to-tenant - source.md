@@ -250,3 +250,39 @@ Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
 - confirmation that oidc federation has been configured as per above.
 
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
+
+## **Step:** Once migration complete, set Out of Office on old mailboxes.
+
+The migrated mailboxes will need to be recreated - properly as 'Shared Mailboxes' to avoid licensing costs.
+
+Based a upon a CSV file, for example
+```csv
+
+```
+
+```powershell
+function Set-BulkMailboxOutOfOffice {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string] $CsvPath
+    )
+
+    Import-Csv $CsvPath | ForEach-Object {
+        Set-MailboxAutoReplyConfiguration `
+            -Identity $_.UserPrincipalName `
+            -AutoReplyState Scheduled `
+            -StartTime $_.StartTime `
+            -EndTime $_.EndTime `
+            -InternalMessage $_.InternalMessage `
+            -ExternalMessage $_.ExternalMessage `
+            -ExternalAudience All
+
+        Write-Host "Updated OOF for $($_.UserPrincipalName)"
+    }
+}
+```
+
+
+
+
