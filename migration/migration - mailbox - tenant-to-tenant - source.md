@@ -257,10 +257,59 @@ The migrated mailboxes will need to be recreated - properly as 'Shared Mailboxes
 
 Based a upon a CSV file, for example
 ```csv
-
+UserPrincipalName,InternalMessage,ExternalMessage
+user1@contoso.com,Migrated to destination.com.,My new email address is newuser1@destination.com 
+user2@contoso.com,Migrated to destination.com.,My new email address is newuser2@destination.com
 ```
 
 ```powershell
+function Add-SharedMailboxFromCsv {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Mandatory)]
+        [string] $CsvPath
+    )
+
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = 'Stop'
+
+    Import-Csv -Path $CsvPath | ForEach-Object {
+      $displayName = $_.DisplayName
+        $alias       = $_.Alias
+        $primarySmtp = $_.PrimarySmtpAddress
+
+        if ([string]::IsNullOrWhiteSpace($displayName)) {
+            throw "CSV row is missing DisplayName."
+        }
+
+        if ([string]::IsNullOrWhiteSpace($alias)) {
+            throw "CSV row for '$displayName' is missing Alias."
+        }
+
+        if ([string]::IsNullOrWhiteSpace($primarySmtp)) {
+            throw "CSV row for '$displayName' is missing PrimarySmtpAddress."
+        }
+
+        $existing = Get-Mailbox -Identity $primarySmtp -ErrorAction SilentlyContinue
+
+        if ($existing) {
+            Write-Warning "Mailbox already exists: $primarySmtp"
+            return
+        }
+
+        if ($PSCmdlet.ShouldProcess($primarySmtp, "Create shared mailbox")) {
+            New-Mailbox `
+                -Shared `
+                -Name $displayName `
+                -DisplayName $displayName `
+                -Alias $alias `
+                -PrimarySmtpAddress $primarySmtp
+
+            Write-Host "Created shared mailbox: $primarySmtp"
+        }
+    }
+}
+
 function Set-BulkMailboxOutOfOffice {
     [CmdletBinding()]
     param(
@@ -268,21 +317,24 @@ function Set-BulkMailboxOutOfOffice {
         [string] $CsvPath
     )
 
+    $startTime = Get-Date
+    $endTime   = $startTime.AddYears(5)
+
     Import-Csv $CsvPath | ForEach-Object {
+
         Set-MailboxAutoReplyConfiguration `
             -Identity $_.UserPrincipalName `
             -AutoReplyState Scheduled `
-            -StartTime $_.StartTime `
-            -EndTime $_.EndTime `
+            -StartTime $startTime `
+            -EndTime $endTime `
             -InternalMessage $_.InternalMessage `
             -ExternalMessage $_.ExternalMessage `
             -ExternalAudience All
 
         Write-Host "Updated OOF for $($_.UserPrincipalName)"
     }
-}
+}```
 ```
-
 
 
 
