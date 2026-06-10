@@ -220,7 +220,7 @@ The creation of the file migration service principals is outline [here](https://
 ### Objective
 All the files are now available in the Azure Files (Storage Account) within the destination tenant.<br>
 - The non-PSTs will need to be imported into the nominated SharePoint site (or sites)
-- The PSTs need to be imported into Exchange Online
+- The PSTs can optionally be imported into Exchange Online
 
 ### Procedures
 
