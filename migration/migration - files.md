@@ -80,6 +80,7 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
 
 1. Each NFS export to be migrated, will be made available as a dedicated NFS export of a read-only Snapshot of the actual NFS export.
+2. Assumption: Storage array is a: Dell PowerScale / EMC Isilon OneFS cluster
 ```bash
 ## 1. Create a snapshot
 ## Example: NFS export points to: /ifs/data/projects
