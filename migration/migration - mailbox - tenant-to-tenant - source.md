@@ -221,8 +221,18 @@ foreach ($permissionName in $exchangePermissionNames) {
 You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
-## **Step 4:** Create a client secret and configure OIDC Federation
-Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
+## **Step 4A:** Create either a client secret or certificate for the created Enterprise Application
+Via the portal - create either a client secret or certificate<br>
+[English - Microsoft Documentation - Create a Certificate](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_certificate)<br>
+[Japanese - Microsoft Documentation - Create a Certificate](https://learn.microsoft.com/ja-JP/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_certificate)<br>
+or<br>
+[English - Microsoft Documentation - Create a Client Secret](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_client-secret)<br>
+[Japanese - Microsoft Documentation - Create a Client Secret](https://learn.microsoft.com/ja-JP/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_client-secret)<br>
+
+## **Step 4B:** Configure OIDC Federation for the created Enterprise Application
+Via the portal - create a oidc federation (Federated Credentials) for the application registration (as per below)<br>
+[English - Microsoft Documentation - Create a Federated Credential](https://learn.microsoft.com/en-us/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_federated-credential)<br>
+[Japanese - Microsoft Documentation - Create a Federated Credential](https://learn.microsoft.com/jp-JA/entra/identity-platform/how-to-add-credentials?tabs=certificate#tabpanel_1_federated-credential)<br>
 
 ```text
 Scenario: GitHub Action
@@ -236,7 +246,7 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main
 Provide the following to EIRE (mailto:Andrew.Webster@eire.com)<br>
 - the client_id (application_id)
 - the tenant_id
-- the secret
+- the secret or certificate (this will probably need to be sent via some sort of secure method) - These **SHOULD NOT** be emailed.
 - confirmation that oidc federation has been configured as per above.
 
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
