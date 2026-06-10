@@ -221,7 +221,7 @@ foreach ($permissionName in $exchangePermissionNames) {
 You can inspect the result in the portal:-
 <img width="1142" height="819" alt="image" src="https://github.com/user-attachments/assets/dac865f5-1b82-4c93-bde6-9c289977e458" />
 
-## **Step 4:** Create Secret and OIDC Federation
+## **Step 4:** Create a client secret and configure OIDC Federation
 Then finally via the portal - create a secret AND an oidc federation (Federated Credentials) for the application registration (as per below)<br>
 
 ```text
