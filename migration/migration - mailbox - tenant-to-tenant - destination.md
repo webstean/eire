@@ -173,8 +173,8 @@ $sp = New-MgServicePrincipal -AppId $app.AppId
 
 Write-Host "Service principal created successfully." -ForegroundColor Green
 Write-Host "  Display Name : $($sp.DisplayName)"
-Write-Host "  Object ID    : $($sp.Id)"
 Write-Host "  App ID       : $($sp.AppId)"
+Write-Host "  Object ID    : $($sp.Id)"
 Write-Host ""
 
 ```
