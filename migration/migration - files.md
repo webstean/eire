@@ -254,11 +254,18 @@ Start-SPMTMigration -ErrorAction Stop
 ```
 
 #### Uploading PSTs into Exchange Online (if required)
+- Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online<br>
+- The precise procedure is given [here (English)](https://learn.microsoft.com/en-US/purview/pst-import-network-upload) or [here (Japanese)](https://learn.microsoft.com/jp-JA/purview/pst-import-network-upload)
 
-- Use the PST Import Service (via the Purview Portal) to create jobs to import PSTS into the destination Exchange Online
-- The precise procedure is given [here (English)](https://learn.microsoft.com/en-US/purview/pst-import-network-upload) or [here (Japanese)](https://learn.microsoft.com/jp-JA/purview/pst-import-network-upload)  
+#### Uploading files into a on-premise NFS
+- Copy files/directories from Azure Files (CIFS) to an on-premise NAS (NFS)<br>
+- Alternaitvely, the files could be moved to an Azure Files (NFS) export and then copy a NFS (Azure) to NFS (on-premise)<br> 
 
-#### Implement agreed security model
+The CIFS share and/or NFS exports, will all need to be mounted on a suitable workstation (either located in Azure or on-premise)
+Then the files will then be copied between the two destinations, using Windows (robocopy) or Linux (rsync) 
+Then adjust permissions (user/group) as per agreed model with destination tenant.
+
+#### Implement agreed security model on SharePoint
 - Leverage PowerShell.PnP powershell modules to create the agreed Role-Based access controls in the destination.
 - Adjust SharePoint Libraries to provide the best end-user experience.
 - Provide end-user facing dcoumentation to help users find their files post-migration.
