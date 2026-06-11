@@ -180,7 +180,7 @@ Write-Host ""
 ```
 ## Step 2: **Perform Administrator Consent**
 Now the correct permissions are assigned, perform an administrator consense for those permissions with the following PowwerShell script.
-This should be executed by the 'Source' tenant, Global Administrator.
+This should be executed by the tenant's, Global Administrator.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -292,7 +292,6 @@ New-ManagementRoleAssignment `
 
 ## Creation of Migration EndPoint
 Create a migration endpoint (authorised to talk to the source) and then establish an organisation relationship from the destination to the source tenant.<br>
-
 
 ```powershell
 Set-StrictMode -Version Latest
