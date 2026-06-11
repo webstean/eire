@@ -317,11 +317,28 @@ Write-Host "Connected to Exchange Online." -ForegroundColor Green
 $AppId = "[Guid copied from the source migrations app -created as per above ($app.AppId))]"
 $name = "xxx-migration"
 $remote = "<source-tenant>.onmicrosoft.com" ## must be a domain name
-$secret = "[secret from the source migration app -created as per above]"
+
 ## Enable customization if tenant is dehydrated
 $dehydrated = Get-OrganizationConfig | select isdehydrated
 if ($dehydrated.isdehydrated -eq $true) {Enable-OrganizationCustomization}
+
+## Create Credential - if using a client secret
+$secret = "[secret from the source migration app -created as per above]"
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
+Connect-ExchangeOnline -Credential $Credential
+
+## Logon with Certificate (located in key store)
+$thumbprint = '[thumbprint of certifcate, in key store]'
+## The tenant name should the intial, onmicrosoft.com domain for certificate authentication to reliability work.
+$TenantName = '[tenant name - destination tenant]'
+Connect-ExchangeOnline -AppId $AppId -CertificateThumbprint $Thumbprint -Organization $TenantName
+
+## Logon with Certificate (certifcate as a local file)
+$PfxPath      = "C:\Certs\exo-app-auth.pfx"
+$PfxPassword  = ConvertTo-SecureString "<pfx-password>" -AsPlainText -Force
+## The tenant name should the intial, onmicrosoft.com domain for certificate authentication to reliability work.
+$TenantName = '[tenant name - destination tenant]'
+Connect-ExchangeOnline -AppId $AppId -Organization $Tenant -CertificateFilePath $PfxPath -CertificatePassword $PfxPassword
 
 ## Add migration endpoint (part of ExchangeOnlineManagement module)
 New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
