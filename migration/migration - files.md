@@ -52,22 +52,22 @@ The workstation will need to be configured as follows:
 > This is recommedended to ensure that those services (AV, EDR, SIEM, proxy etc..) are active throughout the migration, providing protections.
 >
 > ℹ️ **Information**<br>
-> The workstation needs to store detailed meta data (created by rsync), in order to do perform incremental copies of data. This data will need to be preserved throughout the duration of the whole migration
+> The workstation needs to store persistnet meta data (created by rsync), in order to do perform incremental copies of data. This data will need to be preserved throughout the duration of the whole migration
 
 ## Source: Azure Data Box
 
 > Azure Data Box Next-Gen devices are now available with no service fee and no shipping fee when using Microsoft managed shipping.<br>
-> Extra day fee may apply for devices that are not returned within the allotted usage period.
+> Extra day fee will apply for devices that are not returned within the allotted usage period (typically 10 days).
 
-The latest Azure Data Box (Next Gen) is availalbe in Available in 2 storage sizes: *SKU 1* - *120 TB* usable (150 TB raw) and *SKU 2* - *525 TB* usable (600 TB raw)<br>
-The device itself is 7 RU (U) when placed in the rack on its side (cannot be rack-mounted), so it must sit on a shelf<br>
+The latest Azure Data Box (Next Gen) is available in 2 storage sizes: *SKU 1* - *120 TB* usable (150 TB raw) and *SKU 2* - *525 TB* usable (600 TB raw)<br>
+The device itself is 7 RU (U) when placed in the rack on its side (it cannot be rack-mounted), so it must sit on a shelf when used within a rack<br>
 <img width="700" height="497" alt="image" src="https://github.com/user-attachments/assets/ea258b85-370e-463b-b10d-c4abf4365c74" />
 
 # Azure DataBox Cabling requirement
-- 1 X power cable (included from Microsoft)
-- 2 X 10G-BaseT RJ45 cables(CAT-5e or CAT6) (not included, needs to be supplied by source tenant)
-- 2 X 100-GbE QSFP28 passive direct attached cable (not included, needs to be supplied by source tenant). 
-Either the copper (10G-BASET) or twinaux (DAC/passive direct attached) can be utilised for the connection to the workstation.<br>
+- 1 x power cable (included from Microsoft)
+- 2 x 10G-BaseT RJ45 cables(CAT-5e or CAT6) (not included, needs to be supplied by source tenant)
+- 2 x 100-GbE QSFP28 passive direct attached cable (not included, needs to be supplied by source tenant). 
+Either the copper (10G-BASET) or twinaux (DAC/passive direct attached) can be utilised for the connection between the workstation and the DataBox.<br>
 Realistically, unless the workstation is capable of hosting 100-GbE QSFP28 network adapters, the connectivity is recommended to be via 2 x 10G-BASE-T (copper) cables.<br>
 However, there is probably no reasonable need to have load-balancing/failover between the workstation and the Data Box.<br>
 So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required to physically connect the workstation and Azure Data Box.<br>
@@ -99,22 +99,22 @@ isi snapshot snapshots view MigrationSnap_20260610
 
 ## 3. Access the snapshot
 ## Snapshots are exposed through the hidden .snapshot directory:
-## 
+## for the NFS client, access the snashpot as per below.
 /ifs/data/projects/.snapshot/MigrationSnap_20260610
-## You can browse it directly from an NFS client if snapshot access is enabled.
+
 ```
 
 3. This NFS export will then be mounted read-only, in either inside WSL or native on Windows on the workstation (the choice will depend upon the NFS export options)
 ```bash
 ## Example NFS mount
-sudo mount -t nfs -o ro,vers=3 nfs-server:/export/path /mnt/nfs-source
+sudo mount -t nfs -o ro,vers=3 nfs-server:/ifs/data/projects/.snapshot/MigrationSnap_20260610 /mnt/nfs-source
 ```
 3. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
 4. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
 ```bash
 SRC="/mnt/nfs-source/"
 DEST="/mnt/cifs-dest/"
-BASELINE="/mnt/cifs-dest/.baseline-manifest.tsv"
+BASELINE="/path/to/.baseline-manifest.tsv"
 
 rsync -rlt \
   --no-owner --no-group \
@@ -126,7 +126,7 @@ rsync -rlt \
 cd "$SRC"
 find . -type f -printf '%P\t%s\t%T@\n' | sort > "$BASELINE"```
 ```
-5. Incremental: Refresh the Snapshot presented from the NAS Device to be latest version
+5. Incremental: Using the preserved metadata on the workstation, only copy changes to the Azure Data Box.
 ```bash
 SRC="/mnt/nfs-source/"
 DEST="/mnt/cifs-delta/"
@@ -152,7 +152,7 @@ rsync -rlt \
 Repeat incremental as many times as required, with a new Azure Data Box.
 
 > ℹ️ **PST Files**<br>
-> All PST Files will be included in the copies to the Azure Data Box and will be treated as ordinary files.
+> All PST Files will be included in the copies to the Azure Data Box and will not receive any special treatment, except noting that thse PST will typically be large files.
 >
 
 ## Destination: Azure Preparation
