@@ -257,7 +257,7 @@ Connect-ExchangeOnline -ShowBanner:$false
 Write-Host "Connected to Exchange Online." -ForegroundColor Green
 
 $scopeName = 'Migration-Notification'
-$filter = "Alias -like 'HUB_*'"
+$filter = "Alias -like '*migration*'" ## change to the relevant mailbox
 
 $scope = Get-ManagementScope `
     -Identity $scopeName `
@@ -326,16 +326,16 @@ $secret = "[secret from the source migration app -created as per above]"
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AppId, (ConvertTo-SecureString -String $secret -AsPlainText -Force)
 Connect-ExchangeOnline -Credential $Credential
 
-## Logon with Certificate (located in key store)
+## Logon with Certificate (located in local key store)
 $thumbprint = '[thumbprint of certifcate, in key store]'
-## The tenant name should the intial, onmicrosoft.com domain for certificate authentication to reliability work.
+## The tenant name should the intial, xxxx.onmicrosoft.com domain for certificate authentication to reliability work.
 $TenantName = '[tenant name - destination tenant]'
 Connect-ExchangeOnline -AppId $AppId -CertificateThumbprint $Thumbprint -Organization $TenantName
 
 ## Logon with Certificate (certifcate as a local file)
 $PfxPath      = "C:\Certs\exo-app-auth.pfx"
 $PfxPassword  = ConvertTo-SecureString "<pfx-password>" -AsPlainText -Force
-## The tenant name should the intial, onmicrosoft.com domain for certificate authentication to reliability work.
+## The tenant name should the intial, xxxx.onmicrosoft.com domain for certificate authentication to reliability work.
 $TenantName = '[tenant name - destination tenant]'
 Connect-ExchangeOnline -AppId $AppId -Organization $Tenant -CertificateFilePath $PfxPath -CertificatePassword $PfxPassword
 
@@ -362,78 +362,76 @@ If ($null -eq $existingOrgRel)
 
 The migration will be schedule and cordinated via PowerShell scripts.<br>
 Specifically, the following two cmdlets<br>
-- [New-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
-- [Complete-MigrationBatch](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
+- [New-MigrationBatch (English) ](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/start-migrationbatch)
+- [Complete-MigrationBatch (English) ](https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/complete-migrationbatch)
+- [New-MigrationBatch (Japanese) ](https://learn.microsoft.com/jp-JA/powershell/module/exchangepowershell/start-migrationbatch)
+- [Complete-MigrationBatch (Japanese) ](https://learn.microsoft.com/jp-JA/powershell/module/exchangepowershell/complete-migrationbatch)
 
-This requires has dependency of an authorised organisational relationship be setup between the two tenants (as per above).
+These cmdlets have a dependency that the organisational relationship be setup between the two tenants.
 
+A test can be perform to esnure the mailbox endpoint is ready for migration
+```powershell
+## Source Tenant
+## Assumed: already authenticated/authorised with Connect-ExchangeOnline cmdlet
+$migration.MigrationEndpointName = ""
+Test-MigrationServerAvailability -EndPoint '[migration endpoint name]' -TestMailbox '[Primary SMTP address of a MailUser in target tenant]'
+```
+
+A migration file will be automated generated via scripting, as per below:-
+
+```powershell
+## Source Tenant
+## Assumed: already authenticated/authorised with Connect-ExchangeOnline cmdlet
+Get-Mailbox -RecipientTypeDetails UserMailbox,SharedMailbox | Select-Object -ExpandProperty Alias | Export-Csv -Path '.\mailboxstomigrate.csv' -NoTypeInformation -Encoding UTF8
+```
+At this point, the '.\mailboxstomigrate.csv' can be modifed to include only the relevant users.
+Alternatively, the '.\mailboxstomigrate.csv' can be generated from the known mailboxes to be migrated.
+
+To gather a complete detailed information on each mailbox (highly recommended) for troublsheeting purposes. Execute the following:-
+```powershell
+## Source Tenant
+## Assumed: already authenticated/authorised with Connect-ExchangeOnline cmdlet
+$mailboxes = Import-Csv '.\mailboxstomigrate.csv'
+$mailboxes | ForEach-Object { Get-Mailbox $_ } |
+    Select-Object `
+        PrimarySmtpAddress,
+        Alias,
+        SamAccountName,
+        FirstName,
+        LastName,
+        DisplayName,
+        Name,
+        ExchangeGuid,
+        ArchiveGuid,
+        LegacyExchangeDn,
+        EmailAddresses |
+    Export-Csv `
+        -Path '.\mailboxstomigrate-detailed.csv' `
+        -NoTypeInformation `
+        -Encoding UTF8
+```
+Transfer the file(s) from source tenant to destination tenant.
+
+> ℹ️ **Dependency**
+> The destination tenant must have the users provisioned (including the Exchange mailbox), as per the migrated users that are detalied above.
+>
+
+Once the mailboxe have bene created, a mapping CSV file will need to be created, detailing what mailbox from the source, needs to be migrated to destination and the fille will look this<br>
 Simple Mailbox mapping (CSV)
 ```csv
 SourceMailbox,TargetMailbox
 user1@source.com,user1@target.com
 ```
 
-A test can be perform to esnure the mailbox is ready for migration
-```powershell
-$migration.MigrationEndpointName = ""
-Test-MigrationServerAvailability -EndPoint $migration.MigrationEndpointName -TestMailbox "[Primary SMTP address of a MailUser in target tenant]"
-```
+> ℹ️ **Dependency**
+> Both the source and destination tenants, should review the mapping file and explicitly confirm that it is correct.
 
-A migration file can be automated generated via scripting, for example:-
+Once the migration csv has been fully migrated, by all relevant parties. the mailbox migration can then commence.
+Best practice is to batch the mailboxes into groups of no more than 200 mailboxes per batch for the best performance.
 
 ```powershell
-Get-Mailbox -RecipientTypeDetails UserMailbox,SharedMailbox | Select-Object -ExpandProperty Alias | Out-File $migration.UsersTxtFile
-$mailboxes = Get-Content $migration.UsersTxtFile
-$mailboxes | ForEach-Object {Get-Mailbox $_} | Select-Object PrimarySMTPAddress,Alias,SamAccountName,FirstName,LastName,DisplayName,Name,ExchangeGuid,ArchiveGuid,LegacyExchangeDn,EmailAddresses | Export-Clixml $migration.UsersXmlFile
-```
-
-If the mailbox does not already exist, a script can be used to create the Exchange mailbox from a CSV file.
-> ℹ️ **Information**
-> A mailbox can only be created if the corresponding licensed user account already exists and Exchange mailboxes cannot be created without an appropraite license.
->
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
-
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-$VerbosePreference = 'SilentlyContinue'
-
-$csvPath = '.\mailboxes.csv'
-
-$mailboxes = Import-Csv -LiteralPath $csvPath
-
-foreach ($row in $mailboxes) {
-
-    $sourceMailbox = $row.SourceMailbox
-    $targetMailbox = $row.TargetMailbox
-
-    Write-Host "Checking target mailbox: $targetMailbox" -ForegroundColor Cyan
-
-    $existingMailbox = Get-EXOMailbox `
-        -Identity $targetMailbox `
-        -ErrorAction SilentlyContinue
-
-    if ($existingMailbox) {
-        Write-Host "Mailbox already exists: $targetMailbox" -ForegroundColor Green
-        continue
-    }
-
-    Write-Host "Mailbox does not exist. Creating: $targetMailbox" -ForegroundColor Yellow
-
-    New-Mailbox `
-        -Name $targetMailbox `
-        -Alias ($targetMailbox.Split('@')[0]) `
-        -PrimarySmtpAddress $targetMailbox
-
-    Write-Host "Created mailbox: $targetMailbox" -ForegroundColor Green
-}
-```
-
-```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
+## Destination Tenant
+## Assumed: already authenticated/authorised with Connect-ExchangeOnline cmdlet
 New-MigrationBatch `
   -Name "Batch1" `
   -SourceEndpoint "CrossTenantEndpoint" `
@@ -447,8 +445,8 @@ New-MigrationBatch `
 At the appointed time the migration is set to "complete" which deletes the mailbox from the source tenants and fully enables it in the destination.
 
 ```powershell
-## Part of ExchangeOnlineManagement module
-## Assumed, already loggged on with ExchangeOnline cmdlet
+## Destination Tenant
+## Assumed: already authenticated/authorised with Connect-ExchangeOnline cmdlet
 Complete-MigrationBatch -Identity "Batch1"
 ```
 
@@ -456,7 +454,7 @@ Complete-MigrationBatch -Identity "Batch1"
 
 Theortical maximum is 10TB per day (as per Microsoft documentation), 2-5TB is typical.
 
-Pilot/POC will determine the exact throughput available between the two tenants.
+A Pilot/POC should be utilised to determine the exact throughput available between the two tenants, based upon their geography and applicable network links.
 
 # Monitoring
 
