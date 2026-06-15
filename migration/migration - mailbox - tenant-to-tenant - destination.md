@@ -29,10 +29,6 @@ The following are the required permission in the destination tenant to support t
 | PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
 | SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
-| Mailbox Import Export | Application | Ability to import and export mailboxes (so PSTs can be imported)
-| Mail Recipients | Application | Ability to managed mail recipents (so PSTs can be imported)
-
-
 
 
 **API: Microsoft Graph**<br>
@@ -121,10 +117,7 @@ $exchangePermissionNames = @(
     'PeopleSettings.Read.All',
     'MailboxSettings.ReadWrite',
     'SMTP.SendAsApp',
-    'Exchange.ManageAsApp',
-    'Mailbox Import Export',
-    'Mail Recipients'
-
+    'Exchange.ManageAsApp'
 )
 $exchangeSp = Get-MgServicePrincipal `
     -Filter "appId eq '$exchangeAppId'" `
