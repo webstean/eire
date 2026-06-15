@@ -29,6 +29,7 @@ The following are the required permission in the destination tenant to support t
 | PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
 | SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
+| Exchange.ManageAsApp | Application | Allow API management calls from applications
 
 
 **API: Microsoft Graph**<br>
