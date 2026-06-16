@@ -112,6 +112,7 @@ sudo mount -t nfs -o ro,vers=3 nfs-server:/ifs/data/projects/.snapshot/Migration
 3. Mount the Azure Data Box (NET USE) share(s) on the workstation via the 10 GbE connection
 4. Initial: Perform a 'offline metadata file copy with rsync' - that will preserve the metadata of the files copied and their size/data etc..
 ```bash
+#!/bin/sh
 SRC="/mnt/nfs-source/"
 DEST="/mnt/cifs-dest/"
 BASELINE="/path/to/.baseline-manifest.tsv"
@@ -128,6 +129,7 @@ find . -type f -printf '%P\t%s\t%T@\n' | sort > "$BASELINE"```
 ```
 5. Incremental: Using the preserved metadata on the workstation, only copy changes to the Azure Data Box.
 ```bash
+#!/bin/sh
 SRC="/mnt/nfs-source/"
 DEST="/mnt/cifs-delta/"
 BASELINE="/path/to/.baseline-manifest.tsv"
