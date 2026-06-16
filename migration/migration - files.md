@@ -13,12 +13,13 @@ The following information is required to plan and ultimately execute the migrati
 A list of NFS can be obtained as follows:
 NFS client
 ```shell
+#!/bin/sh
 showmount -e 192.168.1.20 ### This might be unrelaible with NFS v4 or later
 rpcinfo -p emc-nas01          
 ```
 NFS server (NAS device)
 ```shell
-## varies between models
+## varies between NAS models
 
 ## EMC VNX / Celerra:
 server_export server_2 -list
