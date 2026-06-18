@@ -268,7 +268,7 @@ Authenticate - Interactively
 Connect-ExchangeOnline
 ```
 or<br>
-Authenticate - Interactively (alternative acocunt)
+Authenticate - Interactively (alternative account)
 ```powershell
 Connect-ExchangeOnline -UserPrincipalName admin@contoso.com
 ```
@@ -282,7 +282,7 @@ Verfiy Authentication
 ```powershell
 Get-EXOMailbox -ResultSize 1
 ```
-This should return information on one mailbox.<br>
+This should return information on one mailbox to confirm the connectivity is working.<br>
 
 Based a upon a CSV file. For example
 ```csv
