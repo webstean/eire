@@ -282,7 +282,7 @@ Verfiy Authentication
 ```powershell
 Get-EXOMailbox -ResultSize 1
 ```
-This should return information on one mailbox to confirm the connectivity is working.<br>
+This will return information on one mailbox to confirm the connectivity is working.<br>
 
 Based a upon a CSV file. For example
 ```csv
