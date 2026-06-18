@@ -333,6 +333,8 @@ $PfxPassword  = ConvertTo-SecureString "<pfx-password>" -AsPlainText -Force
 $TenantName = '[tenant name - destination tenant]'
 Connect-ExchangeOnline -AppId $AppId -Organization $Tenant -CertificateFilePath $PfxPath -CertificatePassword $PfxPassword
 
+Get-MigrationEndpoint | Format-List Name,RemoteServer,RemoteTenant,ExchangeRemoteMove,ApplicationId
+
 ## Add migration endpoint (part of ExchangeOnlineManagement module)
 New-MigrationEndpoint -RemoteServer outlook.office.com -RemoteTenant $remote -Credentials $Credential -ExchangeRemoteMove:$true -Name $name -ApplicationId $AppId
 
