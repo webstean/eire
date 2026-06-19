@@ -227,7 +227,7 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main (or any other)
 **Provide** the client_id (application_id), tenant_id and secret plus confirm the oidc federation to EIRE (mailto:Andrew.Webster@eire.com)
 <img width="1409" height="293" alt="image" src="https://github.com/user-attachments/assets/9a8dde79-6019-483b-81b8-024f8ca895de" />
 
-On the assumption, that Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
+On the assumption, that Exchange Only Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
 
 ```powershell
 Set-StrictMode -Version Latest
@@ -282,6 +282,39 @@ New-ManagementRoleAssignment `
     -Role "Application SMTP.SendAsApp" `
     -App "$($app.Id)" `
     -CustomResourceScope "$($scope.Name)"```
+```
+
+## Assignment of Exchange Administrator Entra ID Role
+
+The use of app only authentication for Exchange Online has undergone a variety of enhancements. Once recent change, is the need to assign the 'Exchange Administrator' to the service principal created above.
+
+[Reference Documentation (English)](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
+[Reference Documentation (Japnese)](https://learn.microsoft.com/jp-ja/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
+
+
+```powershell
+$displayName = 'xxxx-migration-app' ## customise as required
+
+# Get the service principal
+$sp = Get-MgServicePrincipal -Filter "displayName eq '$displayName'"
+
+# Get the Exchange Administrator directory role
+$role = Get-MgDirectoryRole -Filter "displayName eq 'Exchange Administrator'"
+
+# Activate the role if not already activated
+if (-not $role) {
+    $template = Get-MgDirectoryRoleTemplate -Filter "displayName eq 'Exchange Administrator'"
+    New-MgDirectoryRole -RoleTemplateId $template.Id | Out-Null
+    Start-Sleep 10
+    $role = Get-MgDirectoryRole -Filter "displayName eq 'Exchange Administrator'"
+}
+
+# Assign the role
+New-MgDirectoryRoleMemberByRef `
+    -DirectoryRoleId $role.Id `
+    -BodyParameter @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$($sp.Id)"
+    }
 ```
 
 ## Creation of Migration EndPoint
