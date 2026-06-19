@@ -49,6 +49,8 @@ with a suitable certificate/secret and ideally an OIDC federation subject identi
 
 ## **Step 1:** Create App Registration / Enterprise Application
 Create the migration application registration and enterprise application with the following PowerShell:
+
+The following script is intended to be run interactively. And only needs to be run once.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -173,8 +175,10 @@ Write-Host ""
 
 ```
 ## Step 2: **Perform Administrator Consent**
-Now the correct permissions are assigned, perform an administrator consense for those permissions with the following PowwerShell script.
-This should be executed by the tenant's, Global Administrator.
+Now the correct permissions are assigned, perform an administrator consense for those permissions with the following PowwerShell script.<br>
+This should be executed by the tenant's, Global Administrator.<br>
+
+The following script is intended to be run interactively. And only needs to be run once.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -229,6 +233,7 @@ Subject Identifier: repo:webstean/eire:ref:refs/heads/main (or any other)
 
 On the assumption, that Exchange Only Access Permissions have been enabled, the Mail.Send permission won't work. To resolve this, the application must be explicity authorised to send emails to anyone in the organisation with the following:
 
+The following script is intended to be run interactively. And only needs to be run once.
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -291,9 +296,10 @@ The use of app only authentication for Exchange Online has undergone a variety o
 [Reference Documentation (English)](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)<br>
 [Reference Documentation (Japnese)](https://learn.microsoft.com/jp-ja/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)<br>
 
-
+The following script is intended to be run interactively. And only needs to be run once.
 ```powershell
 $displayName = 'xxxx-migration-app' ## customise as required
+Connect-MgGraph -Scopes RoleManagement.ReadWrite.Directory,Application.Read.All
 
 # Get the service principal
 $sp = Get-MgServicePrincipal -Filter "displayName eq '$displayName'"
@@ -301,7 +307,7 @@ $sp = Get-MgServicePrincipal -Filter "displayName eq '$displayName'"
 # Get the Exchange Administrator directory role
 $role = Get-MgDirectoryRole -Filter "displayName eq 'Exchange Administrator'"
 
-# Activate the role if not already activated
+# Activate the role if it is not already activated
 if (-not $role) {
     $template = Get-MgDirectoryRoleTemplate -Filter "displayName eq 'Exchange Administrator'"
     New-MgDirectoryRole -RoleTemplateId $template.Id | Out-Null
