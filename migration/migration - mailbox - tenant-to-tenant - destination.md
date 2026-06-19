@@ -24,11 +24,10 @@ The following are the required permission in the destination tenant to support t
 | Permission | Type | Justification
 |---|---|:---|
 | Mailbox.Migration | Application | Migrate mailboxes
-| Exchange.ManageAsApp | Application | Access Exchange as an application
 | Organization.Read.All | Application | Read (but not change) Exchange settings
 | PeopleSettings.Read.All | Application | Read (but not change) Exchage user settings 
-| SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | MailboxSettings.ReadWrite | Application | Create mailboxes 
+| SMTP.SendAsApp | Application | Send email on behalf of app for reporting (cannot read emails)
 | Exchange.ManageAsApp | Application | Allow API management calls from applications
 
 
@@ -92,7 +91,6 @@ $graphPermissionNames = @(
     'Group.Read.All',
     'GroupMember.Read.All',
     'Mail.Send',
-    'Sites.Read.All',
     'Policy.Read.All'
 )
 $graphSp = Get-MgServicePrincipal `
