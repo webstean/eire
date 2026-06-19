@@ -288,8 +288,8 @@ New-ManagementRoleAssignment `
 
 The use of app only authentication for Exchange Online has undergone a variety of enhancements. Once recent change, is the need to assign the 'Exchange Administrator' to the service principal created above.
 
-[Reference Documentation (English)](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
-[Reference Documentation (Japnese)](https://learn.microsoft.com/jp-ja/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
+[Reference Documentation (English)](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)<br>
+[Reference Documentation (Japnese)](https://learn.microsoft.com/jp-ja/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)<br>
 
 
 ```powershell
