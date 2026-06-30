@@ -133,7 +133,7 @@ VerificationCheckSource        : No issies found!
 VerificationCheckDestination   : No issies found!
 
 ```
-
+plus mailbox migrations details for each mailbox migrated, designed for audit purposes.
 
 
 
