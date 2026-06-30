@@ -34,7 +34,105 @@ Without it we cannot technically guarantee the outcome, since we will only have 
 
 ### Minimal
 
+One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.
+```txt
+Identity                       : user@source.com
+MigrationType                  : ExchangeRemoteMove
+Status                         : Synced
+BatchId                        : MigrationBatch01
+MailboxGuid                    : 3f2c1c0a-6bfa-4a4a-9c5d-8a6c9c1e1234
+MailboxSize                    : 3.45 GB (3,701,234,567 bytes)
+ItemsSynced                    : 24873
+ItemsSkipped                   : 0
+EstimatedTransferSize          : 3.45 GB (3,701,234,567 bytes)
+EstimatedTransferItemCount     : 24873
+SyncedItemCount                : 24873
+SyncedItemsSize                : 3.45 GB (3,701,234,567 bytes)
+PercentComplete                : 100
 
+LastSyncedTime                 : 22/04/2026 10:12:45 AM
+QueuedTime                     : 22/04/2026 08:55:00 AM
+StartTime                      : 22/04/2026 09:00:12 AM
+EndTime                        : 22/04/2026 10:12:45 AM
+
+TotalQueuedDuration            : 00:05:12
+TotalInProgressDuration        : 01:12:33
+TotalTransientFailureDuration  : 00:00:00
+TotalIdleDuration              : 00:02:10
+
+Error                          :
+FailureCode                    :
+FailureType                    :
+
+StatusDetail                   : Completed
+Direction                      : Onboarding
+Flags                          : None
+
+Report                         : {MailboxMigration, InitialSeedingCompleted, IncrementalSyncCompleted, CompletionFinalized}
+```
+
+### Comprehsnive
+
+```txt
+Migration                      : TeantA to Teant B
+MigrationType                  : ExchangeRemoteMove
+Status                         : Completed
+SourceTenant                   : 3f2c1c0a-6bfa-4a4a-9c5d-8a6c9c1e1234
+DestinationTenant              : ab361e78-0baa-8921-67c2-45212aae78d1
+NumbeofBatches                 : 3
+BatchIds                       : MigrationBatch01, MigrationBatch02, MigrationFinal
+TotalMailboxes                 : 722
+TotalMailboxSize               : 958 GB
+TotalItemsSynced               : 1157331
+TotalItemsSkipped              : 0
+
+Batch                          : MigeaitonBatch01
+SourceGroup                    : c40d992f-c372-44a4-ac7c-06f40e9c3404
+SourceGroupMembers             : 501
+LargestMailbox                 : 87 GB
+SmallestMailbox                : 0 GB
+
+Batch                          : MigeaitonBatch02
+SourceGroup                    : 54a9a25b-9090-40db-a8d4-efbbffea9e1d
+SourceGroupMembers             : 214
+LargestMailbox                 : 87 GB
+SmallestMailbox                : 0 GB
+
+Batch                          : MigeaitonFinal
+SourceGroup                    : 5d0ef2da-006d-4689-9c6c-51c718af9419
+SourceGroupMembers             : 7
+LargestMailbox                 : 20 GB
+SmallestMailbox                : 0 GB
+
+Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED
+                               : userb@source.com.au -> userb@destination.com.au SYNCED
+                               : userc@source.com.au -> userc@destination.com.au SYNCED
+                               : userd@source.com.au -> userd@destination.com.au SYNCED
+                               : usere@source.com.au -> usere@destination.com.au SYNCED
+                               : userf@source.com.au -> userf@destination.com.au SYNCED
+                                ...
+
+Mailbox Completion             : usera@source.com.au -> usera@destination.com.au COMPLETED
+                               : userb@source.com.au -> userb@destination.com.au COMPLETED
+                               : userc@source.com.au -> userc@destination.com.au COMPLETED
+                               : userd@source.com.au -> userd@destination.com.au COMPLETED
+                               : usere@source.com.au -> usere@destination.com.au COMPLETED
+                               : userf@source.com.au -> userf@destination.com.au COMPLETED
+                                ...
+
+HealthCheckSource              : 601
+HealthCheckDestination         : 603
+
+HealthSource                   : No issues found!
+HealthDesitnation              : No issues found!
+
+ComnfigurationSource           : No issues found!
+ComnfigurationDestination      : No issues found!
+
+VerificationCheckSource        : No issies found!
+VerificationCheckDestination   : No issies found!
+
+```
 
 
 
