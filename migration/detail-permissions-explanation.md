@@ -9,7 +9,7 @@ Our approach needs the following permissons in both the source and destination t
 | Mailbox.Migration | Application | Essential | Migrate mailboxes | This is a recent additiona, that provide just enough access for the Mailbox Migration.
 | Exchange.ManageAsApp | Application | Essential | Access Exchange as an application. | This permission is needed to logon to Exchange, as an Entra ID Service Principal and is a Microsoft requirement as per [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
 | PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchage user settings. | Historically, we have had issues retreving mailbox information that is used for tracking the migration. These issues were resolved by user this permission.
-| SMTP.SendAsApp | Application | Recommended | Purpose | Our scripts, allow periodical (typically every 10 minutes) the creation of status and any error emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via ()this}[]this tihg
+| SMTP.SendAsApp | Application | Recommended | Purpose | Our automaation (typically every 10 minutes) will detect erorrs or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding)
 
 **API: Microsoft Graph**<br>
 | Permission | Type | Critical | Purpose | Justification
@@ -32,7 +32,7 @@ Without it we cannot technically guarantee the outcome, since we will only have 
 
 ## Reporting Examples
 
-### Minimal
+### Minimal (default Microsoft)
 
 One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.
 ```txt
@@ -71,7 +71,7 @@ Flags                          : None
 Report                         : {MailboxMigration, InitialSeedingCompleted, IncrementalSyncCompleted, CompletionFinalized}
 ```
 
-### Comprehsnive
+### Comprehsnive (our Soluton)
 
 ```txt
 Migration                      : TeantA to Teant B
