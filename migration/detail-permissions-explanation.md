@@ -86,19 +86,19 @@ TotalMailboxSize               : 958 GB
 TotalItemsSynced               : 1157331
 TotalItemsSkipped              : 0
 
-Batch                          : MigeaitonBatch01
+Batch                          : MigrationBatch01
 SourceGroup                    : c40d992f-c372-44a4-ac7c-06f40e9c3404
 SourceGroupMembers             : 501
 LargestMailbox                 : 87 GB
 SmallestMailbox                : 0 GB
 
-Batch                          : MigeaitonBatch02
+Batch                          : MigrationBatch02
 SourceGroup                    : 54a9a25b-9090-40db-a8d4-efbbffea9e1d
 SourceGroupMembers             : 214
 LargestMailbox                 : 87 GB
 SmallestMailbox                : 0 GB
 
-Batch                          : MigeaitonFinal
+Batch                          : MigrationFinal
 SourceGroup                    : 5d0ef2da-006d-4689-9c6c-51c718af9419
 SourceGroupMembers             : 7
 LargestMailbox                 : 20 GB
@@ -129,8 +129,8 @@ HealthDestination              : No issues found!
 ConfigurationSource            : No issues found!
 ConfigurationDestination       : No issues found!
 
-VerificationCheckSource        : No issies found!
-VerificationCheckDestination   : No issies found!
+VerificationCheckSource        : No issues found!
+VerificationCheckDestination   : No issues found!
 
 ```
 plus mailbox migrations details for each mailbox migrated, designed for audit purposes.
