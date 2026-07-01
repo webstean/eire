@@ -80,10 +80,10 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 | Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
 
 > ℹ️ **Note**<br>
-> Note: the DataBox will need temporary access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
-> For a normal migration where you activate once, copy the data, and return the appliance, continuous internet access is not required.
+> Note: Once powered on, the DataBox will need temporary access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
+> For a normal migration where you activate once, copy the data, and return the appliance, continuous internet access is NOT required.
 
-The DataBox has a MGMT interface (typical default IP 192.168.100.5/24) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to temporarily connect a laptop to it, by adjusting the IP address of the laptop in order to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+The DataBox has a MGMT interface (typical default IP 192.168.100.5/24) or sometimes DHCP. This interface is for the initial configuration and activation of the DataBox, so you need to temporarily connect a laptop to it, by adjusting the IP address of the laptop in order to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus. Then the laptop can be disconnected from MGMT interface.
 
 So for example, if the IP Address of the DataBox is 192.168.100.5/24 then the laptop IP address could be 192.168.100.15/24 (or similiar)
 
@@ -95,7 +95,7 @@ For internet access, you can either have gateway software on the laptop to provi
 The DataBox does have limited support for Internet proxies. It does NOT support transparent proxies or HTTPS proxies. It does support a HTTP proxies with No authentication
 or NTLM authentication is supported.
 
-The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination innthe destination tneant: Azure Files, Blob etc... 
+You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc.. interface to match the source tenat's network. The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination innthe destination tneant: Azure Files, Blob etc... 
 
 ## Source: Copying Data to Azure Data Box
 
