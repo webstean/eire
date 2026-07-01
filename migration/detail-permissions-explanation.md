@@ -124,10 +124,10 @@ HealthCheckSource              : 601
 HealthCheckDestination         : 603
 
 HealthSource                   : No issues found!
-HealthDesitnation              : No issues found!
+HealthDestination              : No issues found!
 
-ComnfigurationSource           : No issues found!
-ComnfigurationDestination      : No issues found!
+ConfigurationSource           : No issues found!
+ConfigurationDestination      : No issues found!
 
 VerificationCheckSource        : No issies found!
 VerificationCheckDestination   : No issies found!
