@@ -79,6 +79,11 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 | Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
 | Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
 
+The DevBox has a MGMT interface (default IP 192.168.100.5/255.255.255.0) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to connect a laptop to it, to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+
+The shares on the DevBox are set by Microosft in the factory and cannot be changed or predicted to prior to arrival. But are displayed in the management interface. You need to notes, these ShareNames along with the IP Addresses of MGMT, to setup the workstation to connect to the DevBox.
+
+
 ## Source: Copying Data to Azure Data Box
 
 The anticipated process will be to perform a number of migrations, one initial migration and then one or more incremental migration.
