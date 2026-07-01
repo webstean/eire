@@ -100,9 +100,9 @@ You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc..
 ## WorkSheet
 | Device | Interface | IP Address | SubNet Mask | Default Router | DNS
 |---|:--|:--|:--|:--|:--
-| Laptop | - | 
+| Laptop | - | 192.168.100.15 | 255.255.255.0 | - | -
 | Databox | MGMT1 | 192.168.100.5 | 255.255.255.0 | - | -
-| Databox | MGMT2 | | | - | -
+| Databox | MGMT2 | DHCP | DHCP | DHCP | DHCP
 | Databox | DATA1 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
 | Databox | DATA2 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
 | Databox | DATA3 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
