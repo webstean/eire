@@ -95,7 +95,7 @@ For internet access, you can either have gateway software on the laptop to provi
 The DataBox does have limited support for Internet proxies. It does NOT support transparent proxies or HTTPS proxies. A single HTTP proxy with no authentication
 or NTLM authentication is supported.
 
-You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc.. interface to match the source tenant's network. The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note these ShareNames along with the IP Addresses of DATA interfaces, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination innthe destination tneant: Azure Files, Blob etc... 
+You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc.. interface to match the source tenant's network. The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note these ShareNames along with the IP Addresses of DATA interfaces, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination in the destination tenant: Azure Files share, Blob container etc... 
 
 ## WorkSheet
 | Device | Interface | IP Address | SubNet Mask | Default Router | DNS
@@ -107,8 +107,10 @@ You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc..
 | Databox | DATA2 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
 | Databox | DATA3 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
 
-In most circumstances, you only configure one DATA interface.<br>
-Configuration of multiple interfaces, may be neccessary with very large migrations but requires multi-sessions NFS/CIFS connections, which has complex requirements between the DataBox and the NFS/CIFS array/server.<br>
+In most circumstances, you only configure one DATA interface on the DataBox.<br>
+Configuration of multiple interfaces, may be neccessary with very large migrations but requires multi-sessions NFS/CIFS connections, which have complex requirements between the DataBox and the NFS/CIFS array/server and are typically not worth the additional effort.<br>
+Sometimes you configured two DATA interfaces, because the source tenant provides two connection, but ultimately you are normally only using one.
+
 
 ## Source: Copying Data to Azure Data Box
 
