@@ -85,15 +85,12 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 
 The DevBox has a MGMT interface (default IP 192.168.100.5/255.255.255.0) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to temporarily connect a laptop to it, to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
 
-For internet access, you can either have gateway software on the laptop to provide the Internet connection or use the 2nd MGMT interface to connect a Intennet router or an Ethernet connection that has an Internet connection.
+For internet access, you can either have gateway software on the laptop to provide the Internet connection or use the 2nd MGMT interface to connect a Internet router or an Ethernet connection that has an outbound Internet connection.
 
-The DevBox does have limited support for Internet proxies. It does not support transparent proxies or HTTPS proxies, a HTTP proxy only with either No authentication
+The DevBox does have limited support for Internet proxies. It does not support transparent proxies or HTTPS proxies. It does support a HTTP proxies with No authentication
 or NTLM authentication is supported.
 
 The shares on the DevBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DevBox.
-
-
-
 
 ## Source: Copying Data to Azure Data Box
 
