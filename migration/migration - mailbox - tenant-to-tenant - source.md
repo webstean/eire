@@ -116,7 +116,6 @@ $graphResourceAccess = foreach ($permissionName in $graphPermissionNames) {
 $exchangeAppId = '00000002-0000-0ff1-ce00-000000000000'  ## Office 365 Exchange Online
 $exchangePermissionNames = @(
     'Mailbox.Migration',
-    'Organization.Read.All',
     'PeopleSettings.Read.All',
     'SMTP.SendAsApp',
     'Exchange.ManageAsApp'
