@@ -89,6 +89,9 @@ So for example, if the IP Address of the DataBox is 192.168.100.5/24 then the la
 
 For internet access, you can either have gateway software on the laptop to provide the Internet connection (plus set the default router on the DataBox) or use the 2nd MGMT interface to connect a Internet router or an Ethernet connection that has an outbound Internet connection.
 
+> ℹ️ **Note**<br>
+> Note: By design there is NO ability to install any software (such as transparent proxies, Zscaler, NetScope etc..) on the DataBox.
+
 The DataBox does have limited support for Internet proxies. It does NOT support transparent proxies or HTTPS proxies. It does support a HTTP proxies with No authentication
 or NTLM authentication is supported.
 
