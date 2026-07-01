@@ -79,13 +79,20 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 | Windows Subsystem for Linux installation | [https://learn.microsoft.com/ja-jp/windows/wsl/install]() | [https://learn.microsoft.com/en-US/windows/wsl/install]()
 | Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
 
-The DevBox has a MGMT interface (default IP 192.168.100.5/255.255.255.0) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to connect a laptop to it, to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+> ℹ️ **Note**<br>
+> Note: the DevBox will need access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
+> For a normal migration where you activate once, copy the data, and return the appliance, continuous internet access is not required.
+
+The DevBox has a MGMT interface (default IP 192.168.100.5/255.255.255.0) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to temporarily connect a laptop to it, to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+
+For internet access, you can either have gateway software on the laptop to provide the Internet connection or use the 2nd MGMT interface to connect a Intennet router or an Ethernet connection that has an Internet connection.
+
+The DevBox does have limited support for Internet proxies. It does not support transparent proxies or HTTPS proxies, a HTTP proxy only with either No authentication
+or NTLM authentication is supported.
 
 The shares on the DevBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DevBox.
 
-> ℹ️ **Note**<br>
-> Note: the DevBox will need access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
-> For a normal migration where you activate once, copy the data, and return the appliance, continuous internet access is not required.  
+
 
 
 ## Source: Copying Data to Azure Data Box
