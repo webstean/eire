@@ -80,10 +80,12 @@ So, the assupmtion will be that only one (CAT-5e/CAT-6) cable will be required t
 | Azure Data Box Pricing | [https://azure.microsoft.com/ja-JP/pricing/details/databox/]() | [https://azure.microsoft.com/en-us/pricing/details/databox/]()
 
 > ℹ️ **Note**<br>
-> Note: the DevBox will need access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
+> Note: the DevBox will need temporary access to the Internet, in order to be activated and report back its initial status. It does not need continuous Internet access, but If you reboot or factory reset the device after disconnecting it from the internet, you will need Internet connectivity again for certain management operations, such as reactivation or refreshing its configuration.<br>
 > For a normal migration where you activate once, copy the data, and return the appliance, continuous internet access is not required.
 
-The DevBox has a MGMT interface (default IP 192.168.100.5/255.255.255.0) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to temporarily connect a laptop to it, to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+The DevBox has a MGMT interface (typical default IP 192.168.100.5/24) or sometimes DHCP. This interface is for the initial configuration of the DataBox, so you need to temporarily connect a laptop to it, by adjusting the IP address of the laptop in order to configure the IP addresses of the DATA1, DATA2, etc.. interfaces plus . Then the laptop can be disconnected from MGMT interface.
+
+So for example, if the IP Address of the DataBox is 192.168.100.5/24 then the laotop IP address could be 192.168.100.15/24 (or similiar)
 
 For internet access, you can either have gateway software on the laptop to provide the Internet connection or use the 2nd MGMT interface to connect a Internet router or an Ethernet connection that has an outbound Internet connection.
 
