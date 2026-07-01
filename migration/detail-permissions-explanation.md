@@ -126,8 +126,8 @@ HealthCheckDestination         : 603
 HealthSource                   : No issues found!
 HealthDestination              : No issues found!
 
-ConfigurationSource           : No issues found!
-ConfigurationDestination      : No issues found!
+ConfigurationSource            : No issues found!
+ConfigurationDestination       : No issues found!
 
 VerificationCheckSource        : No issies found!
 VerificationCheckDestination   : No issies found!
