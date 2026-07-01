@@ -92,10 +92,21 @@ For internet access, you can either have gateway software on the laptop to provi
 > ℹ️ **Note**<br>
 > Note: By design there is NO ability to install any software (such as transparent proxies, Zscaler, NetScope etc..) on the DataBox.
 
-The DataBox does have limited support for Internet proxies. It does NOT support transparent proxies or HTTPS proxies. It does support a HTTP proxies with No authentication
+The DataBox does have limited support for Internet proxies. It does NOT support transparent proxies or HTTPS proxies. A single HTTP proxy with no authentication
 or NTLM authentication is supported.
 
-You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc.. interface to match the source tenat's network. The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination innthe destination tneant: Azure Files, Blob etc... 
+You need to configure the IP Address of the applicable DATA1, DATA2, DATA3 etc.. interface to match the source tenant's network. The shares on the DataBox are set by Microsoft in the factory and cannot be changed or predicted prior to arrival. But are displayed in the management interface. You need to note, these ShareNames along with the IP Addresses of MGMT, to be able to setup the workstation to connect to the DataBox. There is typically one SHARE per destination innthe destination tneant: Azure Files, Blob etc... 
+
+## WorkSheet
+| Device | Interface | IP Address | SubNet Mask | Default Router | DNS
+|---|:--|:--|:--|:--|:--
+| Laptop | - | 
+| Databox | MGMT1 | 192.168.100.5 | 255.255.255.0 | - | -
+| Databox | MGMT2 | | | - | -
+| Databox | DATA1 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
+| Databox | DATA2 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
+| Databox | DATA3 | Supplied by source tenant | Supplied by source tenant |Supplied by source tenant |Supplied by source tenant |
+
 
 ## Source: Copying Data to Azure Data Box
 
