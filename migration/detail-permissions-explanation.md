@@ -1,9 +1,20 @@
 
+## Automation
+
 We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and analysis of issues.
 
 Our approach needs the following permissions in both the source and destination tenants via Entra ID multi-tenant app, that is created within the destination tenant and consented to by the source tenant.
 
-**API: Office 365 Exchange Online**<br>
+## Approach
+
+We leverage multi-tenant Application Registration and Service Principal Objects
+
+Application Object: Defines the application within its home tenant, serving as a template for service principals, detailing token issuance, resource access, and actions.
+Service Principal Object: Represents the application in each tenant, defining access policies and permissions.
+Relationships: Clarifies the one-to-one and one-to-many relationships between application objects and service principals.
+Management: Instructions for listing service principals and consequences of modifying or deleting applications.
+
+## **API: Office 365 Exchange Online**<br>
 
 | Permission | Type | Critical | Purpose | Justification
 |---|---|:---|:--|:--|
@@ -12,7 +23,7 @@ Our approach needs the following permissions in both the source and destination 
 | PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchange user settings. | Historically, we have had issues retrieving mailbox information that is used for tracking the migration. These issues were resolved by user this permission.
 | SMTP.SendAsApp | Application | Desirable | Send email for alerting/logging | Our automation (typically every 10 minutes) will detect errors or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding)
 
-**API: Microsoft Graph**<br>
+## **API: Microsoft Graph**<br>
 
 | Permission | Type | Critical | Purpose | Justification
 |---|---|:---|:--|:--|
