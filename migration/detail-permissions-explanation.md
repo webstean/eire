@@ -49,7 +49,7 @@ Without it we cannot technically guarantee the outcome, since we will only have 
 
 One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.
 
-```txt
+```powershell
 Identity                       : user@source.com
 MigrationType                  : ExchangeRemoteMove
 Status                         : Synced
@@ -87,7 +87,7 @@ Report                         : {MailboxMigration, InitialSeedingCompleted, Inc
 
 ### Comprehensive (our Solution)
 
-```txt
+```powershell
 Migration                      : TenantA to Tenant B
 MigrationType                  : ExchangeRemoteMove
 Status                         : Completed
