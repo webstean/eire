@@ -167,4 +167,31 @@ VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destina
 
 In addition, detailed per-mailbox migration records are retained for audit purposes, including key timestamps, outcome state, and any policy or permission-related warnings observed during processing.
 
+```powershell
+...
+
+IdentityDestination            : desta@destination.com
+SourceMailboxId                : 3f2c1c0a-6bfa-4a4a-9c5d-8a6c9c1e1234
+DestinationMailboxId           : bef3431a-56a1-be32-843c-7432102cea3c
+SourceMailboxUPN               : sourcea@source.com
+DestinationMailboxUPN          : desta@destination.com
+MigrationStatus                : Completed
+MailboxSize                    : 4.45 GB (3,701,234,567 bytes)
+ItemsMigrated                  : 23153
+ItemsSkipped                   : 0
+ItemsErrored                   : 0
+
+SourceNumberofFolders          : 71
+DestNumberofFolders            : 71
+SourceFolderCheck (SHA-256)    : b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+DestFolderCheck (SHA-256)      : b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+Completed                      : 22/04/2026 10:12:45 AM
+
+Signed Off                     : Project Team 23/04/2026 09:01:00 AM
+
+COMPLETED                      : sourcea@source.com -> desta@destination.com (desta@destination.com)
+
+.... Next Mailbox
+```
+
 Final reports are typically provided as secured PDFs (password- or certificate-protected), depending on customer governance requirements.
