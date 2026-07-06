@@ -187,9 +187,10 @@ SourceFolderCheck (SHA-256)    : b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380e
 DestFolderCheck (SHA-256)      : b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
 Completed                      : 22/04/2026 10:12:45 AM
 
-Signed Off                     : Project Team 23/04/2026 09:01:00 AM
+Formal Signed Off              : Project Team 23/04/2026 09:01:00 AM
 
 COMPLETED                      : sourcea@source.com -> desta@destination.com (desta@destination.com)
+Checksum                       : fdbd8e75a67f29f701a4e040385e2e23986303ea10239211af907fcbb83578b3e417cb71ce646efd0819dd8c088de1bd
 
 .... Next Mailbox
 ```
