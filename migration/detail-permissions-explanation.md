@@ -1,11 +1,11 @@
 
-## Automation
+# Automation
 
 We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and analysis of issues.
 
 Our approach needs the following permissions in both the source and destination tenants via Entra ID multi-tenant app, that is created within the destination tenant and consented to by the source tenant.
 
-## Approach
+## Technical Approach
 
 We leverage multi-tenant Application Registration and Service Principal Objects
 
@@ -14,7 +14,7 @@ Service Principal Object: Represents the application in each tenant, defining ac
 Relationships: Clarifies the one-to-one and one-to-many relationships between application objects and service principals.
 Management: Instructions for listing service principals and consequences of modifying or deleting applications.
 
-## **API: Office 365 Exchange Online**<br>
+## **API: Office 365 Exchange Online**
 
 | Permission | Type | Critical | Purpose | Justification
 |---|---|:---|:--|:--|
@@ -23,7 +23,7 @@ Management: Instructions for listing service principals and consequences of modi
 | PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchange user settings. | Historically, we have had issues retrieving mailbox information that is used for tracking the migration. These issues were resolved by user this permission.
 | SMTP.SendAsApp | Application | Desirable | Send email for alerting/logging | Our automation (typically every 10 minutes) will detect errors or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding)
 
-## **API: Microsoft Graph**<br>
+## **API: Microsoft Graph**
 
 | Permission | Type | Critical | Purpose | Justification
 |---|---|:---|:--|:--|
@@ -135,8 +135,8 @@ Mailbox Completion             : usera@source.com.au -> usera@destination.com.au
                                 ...
 
 
-HealthCheckSource              : 601 <span style="color:red;"><strong>[APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]</strong></span>
-HealthCheckDestination         : 603 <span style="color:red;"><strong>[APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]</strong></span>
+HealthCheckSource              : 601 [APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]
+HealthCheckDestination         : 603 [APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]
 
 HealthSource                   : No issues found!
 HealthDestination              : No issues found!
@@ -148,5 +148,7 @@ VerificationCheckSource        : No issues found!
 VerificationCheckDestination   : No issues found!
 
 ```
+
+**🔴 Health check APIs:** Application.Read.All, Organization.Read.All, Policy.Read.All
 
 plus mailbox migrations details for each mailbox migrated, designed for audit purposes.
