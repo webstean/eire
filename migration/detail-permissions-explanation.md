@@ -120,7 +120,7 @@ SourceGroupMembers             : 7
 LargestMailbox                 : 20 GB
 SmallestMailbox                : 0 GB
 
-Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
+Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]
                                : userb@source.com.au -> userb@destination.com.au SYNCED [🔴 API Permissions: Mailbox.Migration]
                                : userc@source.com.au -> userc@destination.com.au SYNCED
                                : userd@source.com.au -> userd@destination.com.au SYNCED
@@ -143,8 +143,8 @@ HealthCheckDestination         : 603 [🔴 API Permissions (Destination):Applica
 HealthSource                   : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
 HealthDestination              : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
 
-ConfigurationSource            : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
-ConfigurationDestination       : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
+ConfigurationSource            : No issues found! [🔴 API Permissions (Source):Organization.Read.All]
+ConfigurationDestination       : No issues found! [🔴 API Permissions (Destination):Organization.Read.All]
 
 VerificationCheckSource        : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
 VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
