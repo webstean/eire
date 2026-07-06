@@ -1,39 +1,38 @@
 
-# Automation
+# Our Approach to Msilbox Migration
 
-We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and analysis of issues.
+We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and inbuilit analysis of any issues found.
 
 Our approach needs the following permissions in both the source and destination tenants via Entra ID multi-tenant app, that is created within the destination tenant and consented to by the source tenant.
 
 ## Technical Approach
 
-We leverage multi-tenant Application Registration and Service Principal Objects
-
 Application Object: Defines the application within its home tenant, serving as a template for service principals, detailing token issuance, resource access, and actions.
 Service Principal Object: Represents the application in each tenant, defining access policies and permissions.
 Relationships: Clarifies the one-to-one and one-to-many relationships between application objects and service principals.
-Management: Instructions for listing service principals and consequences of modifying or deleting applications.
+
+The application object is created in the destination tenant, and the source tenant must consent to those permission as outline below.
 
 ## **API: Office 365 Exchange Online**
 
-| Permission | Type | Critical | Purpose | Justification
+| Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| Mailbox.Migration | Application | Essential | Migrate mailboxes | This is a recent addition, that provide just enough access for the Mailbox Migration.
-| Exchange.ManageAsApp | Application | Essential | Access Exchange as an application. | This permission is needed to logon to Exchange, as an Entra ID Service Principal and is a Microsoft requirement as per [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps)
-| PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchange user settings. | Historically, we have had issues retrieving mailbox information that is used for tracking the migration. These issues were resolved by user this permission.
-| SMTP.SendAsApp | Application | Desirable | Send email for alerting/logging | Our automation (typically every 10 minutes) will detect errors or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding)
+| Mailbox.Migration | Application | Essential | Migrate mailboxes | This is a recent addition, that provide just enough access for the Mailbox Migration. |
+| Exchange.ManageAsApp | Application | Essential | Access Exchange as an application. | This permission is needed to logon to Exchange, as an Entra ID Service Principal and is a Microsoft requirement as per [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps) |
+| PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchange user settings. | Historically, we have had issues retrieving mailbox information that is used for tracking the migration. These issues were resolved by user this permission. |
+| SMTP.SendAsApp | Application | Desirable | Send email for alerting/logging | Our automation (typically every 10 minutes) will detect errors or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding) |
 
 ## **API: Microsoft Graph**
 
-| Permission | Type | Critical | Purpose | Justification
+| Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| User.Read.All | Application | Desirable | Read (but not change) user information. | This is used to retrieve and confirm UPN (User Principal Name) as part of onboarding mailboxes into the migration. We also uses this permission to perform a variety of quality checks to ensure the account is ready for migration.
-| Application.Read.All | Application | Desirable | Read (but not change) application information. | We uses this so the application, can read its own application registration / service principal information, which we have found to be important in troubleshooting any issues.
-| Organization.Read.All | Application | Desirable |  Read (but not change) the Exchange organization settings. | We have scripting design to check if configuration changes are made that will impact the migration. We do configuration check, typically once every 3 hours. And if the configuration changes, we provide alerting (typically via email) to inform the relevant members of the project team.
-| Sites.Read.All | Application | No Longer Required | Read (but not change) sites. | Historically, we have used SharePoint sites with dedicated SharePoint lists , to record migration parameters and record migration progression as a method to centrally communication to multiple stakeholders. Most of this functionality is no longer actively being used (or developed), but can be (re)enabled depending upon the project needs.
-| Group.Read.All<br>GroupMember.Read.All | Application | Desirable | Read (but not change) group information (for permission mapping). | We identity users targeted for migration via membership of a group, this permission allow use to identify that membership. Typically the source tenant will create the group, and we'll need to be read it, obtain its membership to add them to the migration batch (or list)
-| Mail.Send | Application | Desirable | Send but cannot Read email | This is a more modern way of sending emails from scripts, that depending upon the tenant configuration, is sometime more optimal. As per above, we send email for status tracking throughout migration and providing an audit trail
-| Policy.Read.All | Application | Desirable | Read (but not change) policies | Our automation provides comprehensive messaging around errors and by being able to retrieve policy information (via this permission) we can typically determine the 'root cause' far faster than manual methods.
+| User.Read.All | Application | Desirable | Read (but not change) user information. | This is used to retrieve and confirm UPN (User Principal Name) as part of onboarding mailboxes into the migration. We also uses this permission to perform a variety of quality checks to ensure the account is ready for migration. |
+| Application.Read.All | Application | Desirable | Read (but not change) application information. | We uses this so the application, can read its own application registration / service principal information, which we have found to be important in troubleshooting any issues. |
+| Organization.Read.All | Application | Desirable |  Read (but not change) the Exchange organization settings. | We have scripting design to check if configuration changes are made that will impact the migration. We do configuration check, typically once every 3 hours. And if the configuration changes, we provide alerting (typically via email) to inform the relevant members of the project team. |
+| Sites.Read.All | Application | No Longer Required | Read (but not change) sites. | Historically, we have used SharePoint sites with dedicated SharePoint lists , to record migration parameters and record migration progression as a method to centrally communication to multiple stakeholders. Most of this functionality is no longer actively being used (or developed), but can be (re)enabled depending upon the project needs. |
+| Group.Read.All<br>GroupMember.Read.All | Application | Desirable | Read (but not change) group information (for permission mapping). | We identity users targeted for migration via membership of a group, this permission allow use to identify that membership. Typically the source tenant will create the group, and we'll need to be read it, obtain its membership to add them to the migration batch (or list) |
+| Mail.Send | Application | Desirable | Send but cannot Read email | This is a more modern way of sending emails from scripts, that depending upon the tenant configuration, is sometime more optimal. As per above, we send email for status tracking throughout migration and providing an audit trail |
+| Policy.Read.All | Application | Desirable | Read (but not change) policies | Our automation provides comprehensive messaging around errors and by being able to retrieve policy information (via this permission) we can typically determine the 'root cause' far faster than manual methods. |
 
 ## Analysis
 
@@ -149,6 +148,6 @@ VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destina
 
 ```
 
-**🔴 Health check APIs:** Application.Read.All, Organization.Read.All, Policy.Read.All
+plus mailbox migrations details for each mailbox migrated, designed for audit purposes, including
 
-plus mailbox migrations details for each mailbox migrated, designed for audit purposes.
+Finals Reports are provided are tpyically provided in PDF (password or certificate protected)
