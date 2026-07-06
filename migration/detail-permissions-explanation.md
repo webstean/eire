@@ -118,7 +118,7 @@ SourceGroupMembers             : 7
 LargestMailbox                 : 20 GB
 SmallestMailbox                : 0 GB
 
-Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED  [[API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
+Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED  [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
                                : userb@source.com.au -> userb@destination.com.au SYNCED
                                : userc@source.com.au -> userc@destination.com.au SYNCED
                                : userd@source.com.au -> userd@destination.com.au SYNCED
@@ -135,17 +135,17 @@ Mailbox Completion             : usera@source.com.au -> usera@destination.com.au
                                 ...
 
 
-HealthCheckSource              : 601 [API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
-HealthCheckDestination         : 603 [API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
+HealthCheckSource              : 601 [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
+HealthCheckDestination         : 603 [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
 
-HealthSource                   : No issues found!
-HealthDestination              : No issues found!
+HealthSource                   : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
+HealthDestination              : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
 
-ConfigurationSource            : No issues found!
-ConfigurationDestination       : No issues found!
+ConfigurationSource            : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
+ConfigurationDestination       : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
 
-VerificationCheckSource        : No issues found!
-VerificationCheckDestination   : No issues found!
+VerificationCheckSource        : No issues found! [🔴 API Permissions (Source):Application.Read.All, Organization.Read.All, Policy.Read.All]
+VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destination):Application.Read.All, Organization.Read.All, Policy.Read.All]
 
 ```
 
