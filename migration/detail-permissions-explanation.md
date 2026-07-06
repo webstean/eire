@@ -1,55 +1,65 @@
 
 # Our Approach to Mailbox Migration
 
-We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and inbuilt analysis of any issues found.
+We have developed multiple automation workflows to make mailbox migrations as smooth, predictable, and low risk as possible. These workflows include continuous checks, validation, and built-in analysis to detect and explain issues early.
 
-Our approach needs the following permissions in both the source and destination tenants via Entra ID multi-tenant app, that is created within the destination tenant and consented to by the source tenant.
+Our approach requires the permissions listed below in both the source and destination tenants. Access is provided through a Microsoft Entra ID multi-tenant application that is created in the destination tenant and then consented to in the source tenant.
 
 ## Technical Approach
 
-<br>Application Object: Defines the application within its home tenant, serving as a template for service principals, detailing token issuance, resource access, and actions.</br>
+Application Object: Defines the application in its home tenant. It acts as the template for how tokens are issued and what API access the app can request.
 
-Service Principal Object: Represents the application in each tenant, defining access policies and permissions.<br>
+Service Principal Object: Represents that application inside each tenant. It is the identity that actually receives permissions and is used for authentication and authorization.
 
-The application object is created in the destination tenant, and the source tenant must consent to that application and its permissions. The permissions leveraged are listed below.
+In this model, the application object is created in the destination tenant. The source tenant then grants consent to the same application so it can operate across both tenants.
+
+The following permissions are used by the automation and reporting workflows.
 
 ## **API: Office 365 Exchange Online**
 
 | Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| Mailbox.Migration | Application | Essential | Migrate mailboxes | This is a recent addition, that provide just enough access for the Mailbox Migration. |
-| Exchange.ManageAsApp | Application | Essential | Access Exchange as an application. | This permission is needed to logon to Exchange, as an Entra ID Service Principal and is a Microsoft requirement as per [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps) |
-| PeopleSettings.Read.All | Application | Desirable | Read (but not change) Exchange user settings. | Historically, we have had issues retrieving mailbox information that is used for tracking the migration. These issues were resolved by user this permission. |
-| SMTP.SendAsApp | Application | Desirable | Send email for alerting/logging | Our automation (typically every 10 minutes) will detect errors or issues and will create emails to the project teams. This is allow immediate response, but to also serve as an audit trail. We have previously used this, with service management systems, such as Service Now to generate tickets for relevant team, when necessary. Despite its name this permission does not allow the sending of email from any mailbox, this capability was removed many years ago and is this access is now further controlled via [this link](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding) |
+| Mailbox.Migration | Application | Essential | Migrate mailboxes | This is the core migration permission and is scoped to mailbox migration operations. It provides the minimum level of access needed to perform migration actions. |
+| Exchange.ManageAsApp | Application | Essential | Access Exchange as an application | This permission is required to sign in to Exchange Online using an Entra ID service principal. Microsoft documents this requirement [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps). |
+| PeopleSettings.Read.All | Application | Desirable | Read (but not modify) Exchange user settings | We use this to read mailbox-related user settings used by validation and migration tracking. In previous projects, this access helped resolve data retrieval gaps that affected monitoring accuracy. |
+| SMTP.SendAsApp | Application | Desirable | Send email for alerts and logging | Our automation runs frequently (typically every 10 minutes) and generates notifications for issues, warnings, and milestones. This supports faster operational response and creates an audit trail for governance. In some engagements, these notifications also integrate with service management tooling such as ServiceNow for ticketing. Despite the name, this permission does not grant unrestricted sending as any mailbox; modern controls are documented [here](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding). |
 
 ## **API: Microsoft Graph**
 
 | Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| User.Read.All | Application | Desirable | Read (but not change) user information. | This is used to retrieve and confirm UPN (User Principal Name) as part of onboarding mailboxes into the migration. We also uses this permission to perform a variety of quality checks to ensure the account is ready for migration. |
-| Application.Read.All | Application | Desirable | Read (but not change) application information. | We uses this so the application, can read its own application registration / service principal information, which we have found to be important in troubleshooting any issues. |
-| Organization.Read.All | Application | Desirable |  Read (but not change) the Exchange organization settings. | We have scripting design to check if configuration changes are made that will impact the migration. We do configuration check, typically once every 3 hours. And if the configuration changes, we provide alerting (typically via email) to inform the relevant members of the project team. |
-| Sites.Read.All | Application | No Longer Required | Read (but not change) sites. | Historically, we have used SharePoint sites with dedicated SharePoint lists , to record migration parameters and record migration progression as a method to centrally communication to multiple stakeholders. Most of this functionality is no longer actively being used (or developed), but can be (re)enabled depending upon the project needs. |
-| Group.Read.All<br>GroupMember.Read.All | Application | Desirable | Read (but not change) group information (for permission mapping). | We identity users targeted for migration via membership of a group, this permission allow use to identify that membership. Typically the source tenant will create the group, and we'll need to be read it, obtain its membership to add them to the migration batch (or list) |
-| Mail.Send | Application | Desirable | Send but cannot Read email | This is a more modern way of sending emails from scripts, that depending upon the tenant configuration, is sometime more optimal. As per above, we send email for status tracking throughout migration and providing an audit trail |
-| Policy.Read.All | Application | Desirable | Read (but not change) policies | Our automation provides comprehensive messaging around errors and by being able to retrieve policy information (via this permission) we can typically determine the 'root cause' far faster than manual methods. |
+| User.Read.All | Application | Desirable | Read (but not modify) user information | Used to retrieve and verify UPNs (User Principal Names) when onboarding mailboxes into migration batches. It also supports readiness checks to confirm account state before migration starts. |
+| Application.Read.All | Application | Desirable | Read (but not modify) application information | Allows the app to read application and service principal metadata. This is useful for diagnostics and troubleshooting authentication or consent issues. |
+| Organization.Read.All | Application | Desirable | Read (but not modify) organization settings | Our scripts periodically check organization-level settings that can affect migration behavior (typically every 3 hours). If a relevant configuration changes, the system sends an alert to the project team. |
+| Sites.Read.All | Application | No Longer Required | Read (but not modify) SharePoint sites | Historically used when SharePoint lists were the central coordination mechanism for migration tracking and parameters. Most of that functionality is now inactive, but can be re-enabled if required by project scope. |
+| Group.Read.All<br>GroupMember.Read.All | Application | Desirable | Read (but not modify) groups and membership for migration scoping | We commonly target users through security or Microsoft 365 group membership. These permissions let the automation read the source group and build migration batches from its members. |
+| Mail.Send | Application | Desirable | Send email without mailbox read access | This is a modern Graph-based method for sending operational notifications. Depending on tenant controls, it can be more reliable than SMTP-based approaches for automation alerts and audit messaging. |
+| Policy.Read.All | Application | Desirable | Read (but not modify) policy configuration | Enables policy-aware diagnostics. By reading policy configuration, automation can identify likely root causes more quickly than manual investigation alone. |
 
 ## Analysis
 
-Going with just the 'essential' permissions, will mean the migration will needs to be undertaken 'blind'. We won't be able to use any of our tooling to properly monitoring the migration and we'll lack the ability to provide audit and comprehensive logging. We won't be confident that the migration is successful or otherwise.
+If only the essential permissions are granted, migration can still proceed, but operational visibility is significantly reduced. In practical terms, the project would run with minimal telemetry and limited automated assurance.
 
-Having undertaken numerous such migrations between large organisations before, we have found our approach to be robust and can deliver on the desired outcomes.
+Without the desirable read and notification permissions:
 
-Without it we cannot technically guarantee the outcome, since we will only have a primitive level of information and no audit trail.
+- Health checks are less informative.
+- Configuration drift is harder to detect early.
+- Root-cause analysis takes longer.
+- Alerting and audit evidence are weaker.
+
+Based on our experience in large tenant-to-tenant migrations, the broader permission set provides materially better governance, faster issue resolution, and more reliable reporting to stakeholders.
+
+In short, essential permissions enable execution, while the full recommended set enables control, confidence, and auditability.
 
 ## Reporting Examples
 
 ### Minimal (default Microsoft)
 
-Only produced, at the conclusion. No ongoing logging or alerting.<br>
+Output is generally produced at the end of migration, with limited ongoing alerting.
 
-Mapping is manually via CSV files (typically). This has historically lead to inaccuracies. We prefer to use Entra ID groups<br>
-One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.<br>
+Mailbox mapping is often maintained manually in CSV files, which can introduce inconsistencies over time. We prefer Entra ID group-driven targeting for stronger control and repeatability.
+
+The output is primarily mailbox-by-mailbox, so building a whole-project view often requires additional manual consolidation.
 
 ```powershell
 Identity                       : user@source.com
@@ -88,6 +98,10 @@ Report                         : {MailboxMigration, InitialSeedingCompleted, Inc
 ```
 
 ### Comprehensive (our Solution)
+
+Our reporting model combines migration progress, pre-flight checks, and post-run verification into one operational view. It includes batch-level summaries, mailbox-level status, dependency checks, and environment health signals.
+
+This enables near-real-time decision making during execution and improves audit readiness after completion.
 
 ```powershell
 Migration                      : TenantA to Tenant B
@@ -151,6 +165,6 @@ VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destina
 
 ```
 
-plus mailbox migrations details for each mailbox migrated, designed for audit purposes, including
+In addition, detailed per-mailbox migration records are retained for audit purposes, including key timestamps, outcome state, and any policy or permission-related warnings observed during processing.
 
-Final reports are typically provided in PDF (password or certificate protected)
+Final reports are typically provided as secured PDFs (password- or certificate-protected), depending on customer governance requirements.
