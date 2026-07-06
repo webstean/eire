@@ -124,8 +124,8 @@ Mailbox Completion             : usera@source.com.au -> usera@destination.com.au
                                 ...
 
 
-HealthCheckSource              : 601 **[Apis:Application.Read.All, Organization.Read.All, Policy.Read.All]**
-HealthCheckDestination         : 603 **[Apis:Application.Read.All, Organization.Read.All, Policy.Read.All]**
+HealthCheckSource              : 601 <span style="color:red;"><strong>[APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]</strong></span>
+HealthCheckDestination         : 603 <span style="color:red;"><strong>[APIs:Application.Read.All, Organization.Read.All, Policy.Read.All]</strong></span>
 
 HealthSource                   : No issues found!
 HealthDestination              : No issues found!
