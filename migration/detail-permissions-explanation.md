@@ -1,17 +1,17 @@
 
-# Our Approach to Msilbox Migration
+# Our Approach to Mailbox Migration
 
-We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and inbuilit analysis of any issues found.
+We have developed numerous automation workflows to ensure the mailbox migration goes as smoothly as possible. This include comprehensive and continuous checking, validation and inbuilt analysis of any issues found.
 
 Our approach needs the following permissions in both the source and destination tenants via Entra ID multi-tenant app, that is created within the destination tenant and consented to by the source tenant.
 
 ## Technical Approach
 
-Application Object: Defines the application within its home tenant, serving as a template for service principals, detailing token issuance, resource access, and actions.
-Service Principal Object: Represents the application in each tenant, defining access policies and permissions.
-Relationships: Clarifies the one-to-one and one-to-many relationships between application objects and service principals.
+<br>Application Object: Defines the application within its home tenant, serving as a template for service principals, detailing token issuance, resource access, and actions.</br>
 
-The application object is created in the destination tenant, and the source tenant must consent to those permission as outline below.
+Service Principal Object: Represents the application in each tenant, defining access policies and permissions.<br>
+
+The application object is created in the destination tenant, and the source tenant must consent to that application and its permissions. The permissions leveraged are listed below.
 
 ## **API: Office 365 Exchange Online**
 
@@ -46,7 +46,10 @@ Without it we cannot technically guarantee the outcome, since we will only have 
 
 ### Minimal (default Microsoft)
 
-One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.
+Only produced, at the conclusion. No ongoing logging or alerting.<br>
+
+Mapping is manually via CSV files (typically). This has historically lead to inaccuracies. We prefer to use Entra ID groups<br>
+One view per mailbox, that then will need to be manually mapped to provide an overview of the whole migration.<br>
 
 ```powershell
 Identity                       : user@source.com
@@ -118,14 +121,14 @@ LargestMailbox                 : 20 GB
 SmallestMailbox                : 0 GB
 
 Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
-                               : userb@source.com.au -> userb@destination.com.au SYNCED [🔴 API Permissions: MailBox.Migration]
+                               : userb@source.com.au -> userb@destination.com.au SYNCED [🔴 API Permissions: Mailbox.Migration]
                                : userc@source.com.au -> userc@destination.com.au SYNCED
                                : userd@source.com.au -> userd@destination.com.au SYNCED
                                : usere@source.com.au -> usere@destination.com.au SYNCED
                                : userf@source.com.au -> userf@destination.com.au SYNCED
                                 ...
 
-Mailbox Completion             : usera@source.com.au -> usera@destination.com.au COMPLETED [🔴 API Permissions: MailBox.Migration]
+Mailbox Completion             : usera@source.com.au -> usera@destination.com.au COMPLETED [🔴 API Permissions: Mailbox.Migration]
                                : userb@source.com.au -> userb@destination.com.au COMPLETED
                                : userc@source.com.au -> userc@destination.com.au COMPLETED
                                : userd@source.com.au -> userd@destination.com.au COMPLETED
@@ -150,4 +153,4 @@ VerificationCheckDestination   : No issues found! [🔴 API Permissions (Destina
 
 plus mailbox migrations details for each mailbox migrated, designed for audit purposes, including
 
-Finals Reports are provided are tpyically provided in PDF (password or certificate protected)
+Final reports are typically provided in PDF (password or certificate protected)
