@@ -118,15 +118,15 @@ SourceGroupMembers             : 7
 LargestMailbox                 : 20 GB
 SmallestMailbox                : 0 GB
 
-Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED  [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
-                               : userb@source.com.au -> userb@destination.com.au SYNCED
+Mailbox Mapping                : usera@source.com.au -> usera@destination.com.au SYNCED [🔴 API Permissions (Source):User.Read.All, User.Group.All, User.GroupMember.All]**
+                               : userb@source.com.au -> userb@destination.com.au SYNCED [🔴 API Permissions: MailBox.Migration]
                                : userc@source.com.au -> userc@destination.com.au SYNCED
                                : userd@source.com.au -> userd@destination.com.au SYNCED
                                : usere@source.com.au -> usere@destination.com.au SYNCED
                                : userf@source.com.au -> userf@destination.com.au SYNCED
                                 ...
 
-Mailbox Completion             : usera@source.com.au -> usera@destination.com.au COMPLETED
+Mailbox Completion             : usera@source.com.au -> usera@destination.com.au COMPLETED [🔴 API Permissions: MailBox.Migration]
                                : userb@source.com.au -> userb@destination.com.au COMPLETED
                                : userc@source.com.au -> userc@destination.com.au COMPLETED
                                : userd@source.com.au -> userd@destination.com.au COMPLETED
