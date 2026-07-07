@@ -15,12 +15,12 @@ In this model, the application object is created in the destination tenant. The 
 
 The following permissions are used by the automation and reporting workflows.
 
-## **API: Office 365 Exchange Online**
+## **API: Exchange Online**
 
 | Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| Mailbox.Migration | Application | Essential | Migrate mailboxes | This is the core migration permission and is scoped to mailbox migration operations. It provides the minimum level of access needed to perform migration actions. |
-| Exchange.ManageAsApp | Application | Essential | Access Exchange as an application | This permission is required to sign in to Exchange Online using an Entra ID service principal. Microsoft documents this requirement [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps). |
+| **Mailbox.Migration** | Application | Mandatory | Migrate mailboxes | This is the core migration permission and is scoped to mailbox migration operations. It provides the minimum level of access needed to perform migration actions. |
+| **Exchange.ManageAsApp** | Application | Mandatory | Access Exchange as an application | This permission is required to sign in to Exchange Online using an Entra ID service principal. Microsoft documents this requirement [here](https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps). |
 | PeopleSettings.Read.All | Application | Desirable | Read (but not modify) Exchange user settings | We use this to read mailbox-related user settings used by validation and migration tracking. In previous projects, this access helped resolve data retrieval gaps that affected monitoring accuracy. |
 | SMTP.SendAsApp | Application | Desirable | Send email for alerts and logging | Our automation runs frequently (typically every 10 minutes) and generates notifications for issues, warnings, and milestones. This supports faster operational response and creates an audit trail for governance. In some engagements, these notifications also integrate with service management tooling such as ServiceNow for ticketing. Despite the name, this permission does not grant unrestricted sending as any mailbox; modern controls are documented [here](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/smtp-app-rbac-onboarding). |
 
@@ -28,8 +28,8 @@ The following permissions are used by the automation and reporting workflows.
 
 | Permission | Type | Critical | Purpose | Justification |
 |---|---|:---|:--|:--|
-| User.Read.All | Application | Desirable | Read (but not modify) user information | Used to retrieve and verify UPNs (User Principal Names) when onboarding mailboxes into migration batches. It also supports readiness checks to confirm account state before migration starts. |
-| Application.Read.All | Application | Desirable | Read (but not modify) application information | Allows the app to read application and service principal metadata. This is useful for diagnostics and troubleshooting authentication or consent issues. |
+| **User.Read.All** | Application | Mandatory | Read (but not modify) user information | Used to retrieve and verify UPNs (User Principal Names) when onboarding mailboxes into migration batches. It also supports readiness checks to confirm account state before migration starts. |
+| Application.Read.All | Application | Mandatory | Read (but not modify) application information | Allows the app to read application and service principal metadata. This is useful for diagnostics and troubleshooting authentication or consent issues. |
 | Organization.Read.All | Application | Desirable | Read (but not modify) organization settings | Our scripts periodically check organization-level settings that can affect migration behavior (typically every 3 hours). If a relevant configuration changes, the system sends an alert to the project team. |
 | Sites.Read.All | Application | No Longer Required | Read (but not modify) SharePoint sites | Historically used when SharePoint lists were the central coordination mechanism for migration tracking and parameters. Most of that functionality is now inactive, but can be re-enabled if required by project scope. |
 | Group.Read.All<br>GroupMember.Read.All | Application | Desirable | Read (but not modify) groups and membership for migration scoping | We commonly target users through security or Microsoft 365 group membership. These permissions let the automation read the source group and build migration batches from its members. |
