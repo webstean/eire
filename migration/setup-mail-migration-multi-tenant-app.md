@@ -130,6 +130,16 @@ Write-Host ""
 
 ```
 
-Finally, create either a secret or a certificate. Or ideally, leverage OIDC Federation so now secret needs to be created at all.
+Finally, create either a secret or a certificate.<br>
+
+If Conditional Access policies will allow a logon from GitHub.com, then you can leverage OIDC Federation between Entra ID and GitHubAzure and so no secret/certificate needs to be created at all. This can be configured as follows:-
+
+```txt
+Scenario: GitHub Action
+Repo Owner: webstean
+Repo Name: eire-private
+Branch name: main
+Subject Identifier: repo:webstean/eire-private:ref:refs/heads/main
+```
 
 
