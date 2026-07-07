@@ -1,5 +1,7 @@
 Setup the minimial permissions for just mailbox migration.
 
+The is a miulti-tenant app, that is defined on the destination tenant and then consented to by the source tenant.
+
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
