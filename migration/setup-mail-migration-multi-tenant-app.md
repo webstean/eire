@@ -129,3 +129,7 @@ Write-Host "  Object ID    : $($sp.Id)"
 Write-Host ""
 
 ```
+
+Finally, create either a secret or a certificate. Or ideally, leverage OIDC Federation so now secret needs to be created at all.
+
+
