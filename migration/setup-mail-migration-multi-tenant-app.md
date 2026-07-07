@@ -2,6 +2,18 @@ Setup the minimial permissions for just mailbox migration.
 
 The is a miulti-tenant app, that is defined on the destination tenant and then consented to by the source tenant.
 
+- Multi-Teant App
+- WEb Redirect URI of 'https://office.com'
+- Permissions Required (applicable to both source and destination)
+
+
+API: Microsoft Graph: 'User.Read.All'
+API: Microsoft Graph: 'Application.Read.All'
+API: Exchange Online: 'Mailbox.Migration'
+API: Exchange Online: 'Exchange.ManageAsApp'
+
+
+
 ```powershell
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
