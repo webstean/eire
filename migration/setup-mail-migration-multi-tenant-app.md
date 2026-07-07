@@ -1,4 +1,4 @@
-aaa
+Setup the minimial permissions for just mailbox migration.
 
 ```powershell
 Set-StrictMode -Version Latest
