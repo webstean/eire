@@ -3,6 +3,8 @@
 ## Notepad $profile  
 
 
+## Invoke-RobocopyMirrorforNAS 'J:' 'N:\Data Migration POC'
+
 ## Invoke-RobocopyMirrorforNAS 'J:\_NAS移行用\@_lowcapacity\' 'N:\Data Migration POC'
 
 ## DIR J:\_NAS移行用\@_lowcapacity\
