@@ -96,3 +96,19 @@ function Invoke-RobocopyMirrorforNAS {
     }
 }
 
+Function Get-Robocopyinfo {
+    Write-Host "+========================================================="
+    Write-Host "RoboCopy Info:"
+    (Get-Item "$env:SystemRoot\System32\Robocopy.exe").VersionInfo.FileVersion
+    $os = Get-CimInstance -ClassName Win32_OperatingSystem
+    $type = if ($os.ProductType -eq 1) { "Client" } else { "Server" }
+    Write-Host "$type - $($os.Caption) (Build $($os.BuildNumber))"
+    Write-Host "+========================================================="
+}    
+
+Write-Output "Ready for NAS copies
+Write-Output "Functions defined: Invoke-RobocopyMirrorforNAS
+Get-Robocopyinfo
+
+
+
