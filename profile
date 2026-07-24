@@ -1,3 +1,9 @@
+
+
+## Invoke-RobocopyMirrorforNAS 'J:\_NAS移行用\@_lowcapacity\' 'N:\Data Migration POC'
+
+ 
+
 function Invoke-RobocopyMirrorforNAS {
     [CmdletBinding()]
     param(
