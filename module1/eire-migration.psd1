@@ -15,7 +15,7 @@
         'Microsoft.Graph.Users',
         'Microsoft.Graph.Groups',
         'ExchangeOnlineManagement',
-        'PnP.PowerShell',
+        'PnP.PowerShell'
     )
 
     FunctionsToExport = @(
@@ -31,8 +31,11 @@
     )
 }
 
-# Example: load this module by manifest path
-# Import-Module -Name "$PSScriptRoot\eire-migration.psd1" -Force
+## Example: load this module by manifest path
+## Script
+#Import-Module -Name "$PSScriptRoot\eire-migration.psd1" -Force
+## Interactive
+#Import-Module -Name .\eire-migration.psd1 -Force
 
-# Example: load this module by name (after installation or when module folder is in PSModulePath)
-# Import-Module -Name 'eire-migration' -Force
+# Example: load this module by name after installation
+#Import-Module -Name 'eire-migration' -Force
