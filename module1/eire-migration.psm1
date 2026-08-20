@@ -1185,6 +1185,177 @@ function Get-DirectoryChecksum {
     }
 }
 
+function Get-SummaryofSharePoint {
+    <#
+    .SYNOPSIS
+        Generates a complete file inventory for a SharePoint site with total size summary.
+
+    .DESCRIPTION
+        Enumerates all non-hidden document libraries in the currently connected SharePoint
+        Online site and returns every file with name and size. The final row in the output
+        is a summary row containing the total size of all files.
+
+    .PARAMETER SiteUrl
+        Expected SharePoint site URL for the current PnP connection.
+
+    .PARAMETER ReportPath
+        Optional CSV output path. When provided, results are exported including the
+        final summary row.
+
+    .EXAMPLE
+        Connect-PnPOnline -Url https://contoso.sharepoint.com/sites/mysite -Interactive
+        Get-SummaryofSharePoint -SiteUrl 'https://contoso.sharepoint.com/sites/mysite'
+
+    .EXAMPLE
+        Get-SummaryofSharePoint -SiteUrl 'https://contoso.sharepoint.com/sites/mysite' -ReportPath '.\spo-summary.csv'
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, HelpMessage = 'SharePoint site URL expected for the active PnP connection, e.g. https://contoso.sharepoint.com/sites/mysite.')]
+        [string]$SiteUrl,
+
+        [Parameter(HelpMessage = 'Optional CSV report path. When specified, output is exported to this file.')]
+        [string]$ReportPath
+    )
+
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = 'Stop'
+
+    $ctx = Get-PnPContext
+    if (-not $ctx) {
+        throw 'No active PnP connection found. Run Connect-PnPOnline first.'
+    }
+
+    $connectedSiteUrl = $ctx.Web.Url
+    if ($connectedSiteUrl -ne $SiteUrl) {
+        throw "Connected site '$connectedSiteUrl' does not match requested SiteUrl '$SiteUrl'."
+    }
+
+    $rows = [System.Collections.Generic.List[object]]::new()
+
+    $documentLibraries = Get-PnPList | Where-Object {
+        $_.BaseTemplate -eq 101 -and -not $_.Hidden
+    }
+
+    foreach ($library in $documentLibraries) {
+        Write-Verbose "Scanning library: $($library.Title)"
+
+        $items = Get-PnPListItem -List $library -PageSize 2000 -Fields 'FileRef', 'FileLeafRef', 'File_x0020_Size', 'FSObjType'
+
+        foreach ($item in $items) {
+            if ($item.FieldValues['FSObjType'] -ne 0) {
+                continue
+            }
+
+            $sizeBytes = [int64]($item.FieldValues['File_x0020_Size'])
+            $rows.Add([PSCustomObject]@{
+                    Library           = $library.Title
+                    Name              = [string]$item.FieldValues['FileLeafRef']
+                    ServerRelativeUrl = [string]$item.FieldValues['FileRef']
+                    SizeBytes         = $sizeBytes
+                    SizeMB            = [math]::Round($sizeBytes / 1MB, 2)
+                })
+        }
+    }
+
+    $sortedRows = @($rows | Sort-Object Library, ServerRelativeUrl)
+    $totalSizeBytes = [int64](($sortedRows | Measure-Object -Property SizeBytes -Sum).Sum)
+    $totalFiles = $sortedRows.Count
+
+    $summaryRow = [PSCustomObject]@{
+        Library           = 'TOTAL'
+        Name              = "TOTAL FILES: $totalFiles"
+        ServerRelativeUrl = ''
+        SizeBytes         = $totalSizeBytes
+        SizeMB            = [math]::Round($totalSizeBytes / 1MB, 2)
+    }
+
+    $outputRows = @($sortedRows + $summaryRow)
+
+    if ($ReportPath) {
+        $outputRows | Export-Csv -Path $ReportPath -NoTypeInformation -Encoding UTF8BOM
+    }
+
+    $outputRows
+}
+
+function Get-SummaryofDirectory {
+    <#
+    .SYNOPSIS
+        Generates a recursive file inventory for a single directory with total size summary.
+
+    .DESCRIPTION
+        Recursively enumerates all files under the specified directory and returns
+        file name and size details. The final row in the output is a summary row
+        containing total file count and total size.
+
+    .PARAMETER DirectoryPath
+        Root directory path to inventory recursively.
+
+    .PARAMETER ReportPath
+        Optional CSV output path. When provided, results are exported including the
+        final summary row.
+
+    .EXAMPLE
+        Get-SummaryofDirectory -DirectoryPath 'D:\MigrationData'
+
+    .EXAMPLE
+        Get-SummaryofDirectory -DirectoryPath '\\server\share\migration' -ReportPath '.\directory-summary.csv'
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, HelpMessage = 'Path to the root directory to inventory recursively.')]
+        [ValidateScript({ Test-Path -LiteralPath $_ -PathType Container })]
+        [string]$DirectoryPath,
+
+        [Parameter(HelpMessage = 'Optional CSV report path. When specified, output is exported to this file.')]
+        [string]$ReportPath
+    )
+
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = 'Stop'
+
+    $resolvedDirectory = (Resolve-Path -LiteralPath $DirectoryPath).Path
+    $rootForRelative = $resolvedDirectory.TrimEnd('\', '/')
+
+    $rows = @(
+        foreach ($file in (Get-ChildItem -LiteralPath $resolvedDirectory -Recurse -File)) {
+            $sizeBytes = [int64]$file.Length
+            $relativePath = $file.FullName.Substring($rootForRelative.Length).TrimStart('\', '/')
+
+            [PSCustomObject]@{
+                DirectoryRoot = $resolvedDirectory
+                Name          = $file.Name
+                RelativePath  = $relativePath
+                FullPath      = $file.FullName
+                SizeBytes     = $sizeBytes
+                SizeMB        = [math]::Round($sizeBytes / 1MB, 2)
+            }
+        }
+    )
+
+    $sortedRows = @($rows | Sort-Object RelativePath)
+    $totalSizeBytes = [int64](($sortedRows | Measure-Object -Property SizeBytes -Sum).Sum)
+    $totalFiles = $sortedRows.Count
+
+    $summaryRow = [PSCustomObject]@{
+        DirectoryRoot = 'TOTAL'
+        Name          = "TOTAL FILES: $totalFiles"
+        RelativePath  = ''
+        FullPath      = ''
+        SizeBytes     = $totalSizeBytes
+        SizeMB        = [math]::Round($totalSizeBytes / 1MB, 2)
+    }
+
+    $outputRows = @($sortedRows + $summaryRow)
+
+    if ($ReportPath) {
+        $outputRows | Export-Csv -Path $ReportPath -NoTypeInformation -Encoding UTF8BOM
+    }
+
+    $outputRows
+}
+
 function Compare-AzureFilesToSharePoint {
     <#
     .SYNOPSIS

@@ -27,6 +27,8 @@
         'Invoke-RobocopyMirrorforNAS',
         'Compare-DirectoryChecksum',
         'Get-DirectoryChecksum',
+        'Get-SummaryofSharePoint',
+        'Get-SummaryofDirectory',
         'Compare-AzureFilesToSharePoint'
     )
 }

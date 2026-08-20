@@ -7,10 +7,13 @@ Connect-ExchangeOnlineWithClientSecret  # Connect to the Exchange Online with a 
 Connect-MSGraphWithCertificate          # Connect to the Microsoft Graph API with a certificate
 Connect-ExchangeOnlineWithCertificate   # Connect to the Exchange Online with a certificate
 
-Invoke-RobocopyMirrorforNAS             # Azure Files to NAS copies
-Compare-DirectoryChecksum               # Compare the checksum between two directory
+Invoke-RobocopyMirrorforNAS             # Perform an Azure Files to NAS copy
 Get-DirectoryChecksum                   # Get the directory checksum for a single directory
-Compare-AzureFilesToSharePoint          # Compare 
+Compare-DirectoryChecksum               # Compare the checksum on the contents of two directories
+Compare-AzureFilesToSharePoint          # Compare the contents of a ShareSite folder to a file shares (one-level only)
+Get-SummaryofSharePoint                 # Generate a complete list of all the contents of SharePoint site, including name and size of all files
+Get-SummaryofDirectory                  # Generate a complete list of all the contents of Azure Files directory, including name and size of all files
+
 
 ## Example: load this module by manifest path
 ## Script
