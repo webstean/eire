@@ -39,5 +39,3 @@
 ## Interactive
 #Import-Module -Name .\eire-migration.psd1 -Force
 
-# Example: load this module by name after installation
-#Import-Module -Name 'eire-migration' -Force
